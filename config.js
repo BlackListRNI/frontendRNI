@@ -1,7 +1,6 @@
 // Auto-configuration based on environment
 (function() {
     const hostname = window.location.hostname;
-    const protocol = window.location.protocol;
     
     // Configuration map
     const configs = {
@@ -15,23 +14,18 @@
             environment: 'development'
         },
         
-        // Production on Netlify
+        // Production on Netlify - ALWAYS use DuckDNS backend
         'registronacionaldeinfieles.netlify.app': {
             apiUrl: 'http://coquettecraft.duckdns.org:3070/api',
             environment: 'production'
         }
     };
     
-    // Get config or use fallback
-    let config = configs[hostname];
-    
-    if (!config) {
-        // Fallback: same host, port 3070
-        config = {
-            apiUrl: `${protocol}//${hostname}:3070/api`,
-            environment: 'production'
-        };
-    }
+    // Get config or use default production
+    let config = configs[hostname] || {
+        apiUrl: 'http://coquettecraft.duckdns.org:3070/api',
+        environment: 'production'
+    };
     
     // Set global config
     window.APP_CONFIG = {
@@ -40,8 +34,9 @@
         HOSTNAME: hostname
     };
     
-    // Log configuration
+    // Log configuration for debugging
     console.log('🌐 Environment:', config.environment);
     console.log('🔗 API URL:', config.apiUrl);
     console.log('📍 Hostname:', hostname);
+    console.log('✅ Config loaded successfully');
 })();

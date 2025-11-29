@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Negra | Registro Comunitario</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../shared/styles/main.css">
+    <link rel="stylesheet" href="../shared/styles/responsive.css">
+    <link rel="stylesheet" href="../modules/reports/reports.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <a href="/" class="brand-logo">
+                Lista<span>Negra</span>
+            </a>
+            <nav class="nav-links">
+                <a href="/" class="nav-link" data-route="home">Inicio</a>
+                <a href="../modules/reports/reports.html" class="nav-link">Reportar</a>
+            </nav>
+        </header>
+
+        <main id="app-content">
+            <!-- Dynamic Content Will Be Injected Here -->
+            <div class="loader"></div>
+        </main>
+
+        <footer class="main-footer mt-2">
+            <p>&copy; 2023 Lista Negra. Comunidad Segura.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Config -->
+    <script>
+        window.APP_CONFIG = {
+            API_URL: 'http://localhost:3070/api'
+        };
+    </script>
+    
+    <!-- Utils -->
+    <script src="../shared/utils/api.js"></script>
+    <script src="../shared/utils/fingerprint.js"></script>
+    
+    <!-- Modules -->
+    <script src="../modules/reports/reports.js"></script>
+    <script src="../modules/reports/reports-extended.js"></script>
+    <script src="../modules/disputes/disputes.js"></script>
+    
+    <!-- Core -->
+    <script src="app.js"></script>
+</body>
+</html>

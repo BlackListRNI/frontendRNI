@@ -1,0 +1,12 @@
+# robots.txt for Lista Negra de Infieles
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+# Sitemap
+Sitemap: http://coquettecraft.duckdns.org:3050/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1

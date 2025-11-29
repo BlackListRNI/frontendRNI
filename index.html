@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>Lista Negra de Infieles | Registro Comunitario Global</title>
+    <meta name="description"
+        content="Registro público y comunitario de casos de infidelidad verificados. Protege a tu comunidad reportando y verificando casos de manera anónima y segura.">
+    <meta name="keywords"
+        content="lista negra, infieles, infidelidad, registro comunitario, verificación, reportes, protección comunitaria">
+    <meta name="author" content="Lista Negra">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Spanish">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://coquettecraft.duckdns.org:3050/">
+    <meta property="og:title" content="Lista Negra de Infieles | Registro Comunitario">
+    <meta property="og:description"
+        content="Registro público y comunitario de casos de infidelidad verificados. Protege a tu comunidad.">
+    <meta property="og:image" content="http://coquettecraft.duckdns.org:3050/assets/og-image.jpg">
+    <meta property="og:locale" content="es_ES">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="http://coquettecraft.duckdns.org:3050/">
+    <meta property="twitter:title" content="Lista Negra de Infieles | Registro Comunitario">
+    <meta property="twitter:description" content="Registro público y comunitario de casos de infidelidad verificados.">
+    <meta property="twitter:image" content="http://coquettecraft.duckdns.org:3050/assets/og-image.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a0e16">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://coquettecraft.duckdns.org:3050/">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="shared/styles/main.css">
+    <link rel="stylesheet" href="shared/styles/responsive.css">
+    <link rel="stylesheet" href="modules/reports/reports.css">
+
+    <!-- Structured Data / Schema.org -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Lista Negra de Infieles",
+        "description": "Registro público y comunitario de casos de infidelidad verificados",
+        "url": "http://coquettecraft.duckdns.org:3050/",
+        "applicationCategory": "SocialNetworkingApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.5",
+            "ratingCount": "1250"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <a href="/" class="brand-logo">
+                Lista<span>Negra</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#/" class="nav-link" data-route="home">Inicio</a>
+                <a href="#/registrar" class="nav-link" data-route="registrar">Registrar Infiel</a>
+                <a href="#/perfil" class="nav-link" data-route="perfil" id="navPerfil" style="display:none;">Mi
+                    Perfil</a>
+                <a href="#/login" class="nav-link" data-route="login" id="navLogin">Iniciar Sesión</a>
+                <a href="#/" class="nav-link" id="navLogout" style="display:none;"
+                    onclick="window.AuthModule.logout()">Cerrar Sesión</a>
+            </nav>
+        </header>
+
+        <main id="app-content">
+            <!-- Dynamic Content Will Be Injected Here -->
+            <div class="loader"></div>
+        </main>
+
+        <footer class="main-footer mt-2">
+            <p>&copy; 2023 Lista Negra. Comunidad Segura.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Config -->
+    <script src="config.js"></script>
+
+    <!-- Utils -->
+    <script src="shared/utils/sound.js"></script>
+    <script src="shared/utils/toast.js"></script>
+    <script src="shared/utils/api.js"></script>
+    <script src="shared/utils/fingerprint.js"></script>
+    <script src="shared/utils/auth.js"></script>
+
+    <!-- Modules -->
+    <script src="modules/reports/reports.js"></script>
+    <script src="modules/reports/reports-extended.js"></script>
+    <script src="modules/disputes/disputes.js"></script>
+    <script src="modules/auth/auth.js"></script>
+    <script src="modules/profile/profile.js"></script>
+
+    <!-- Core -->
+    <script src="core/app.js"></script>
+</body>
+
+</html>

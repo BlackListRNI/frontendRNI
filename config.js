@@ -14,16 +14,16 @@
             environment: 'development'
         },
         
-        // Production on Netlify - ALWAYS use DuckDNS backend with HTTPS
+        // Production on Netlify - Backend en Koyeb
         'registronacionaldeinfieles.netlify.app': {
-            apiUrl: 'https://coquettecraft.duckdns.org/api',
+            apiUrl: 'https://TU-APP-KOYEB.koyeb.app/api', // ⚠️ ACTUALIZAR después del deploy
             environment: 'production'
         }
     };
     
     // Get config or use default production
     let config = configs[hostname] || {
-        apiUrl: 'https://coquettecraft.duckdns.org/api',
+        apiUrl: 'https://TU-APP-KOYEB.koyeb.app/api', // ⚠️ ACTUALIZAR después del deploy
         environment: 'production'
     };
     

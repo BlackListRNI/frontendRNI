@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Configuración API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔍 Verificación de Configuración API</h1>
+        
+        <div id="config-info"></div>
+        <div id="test-results"></div>
+        
+        <button onclick="testAPI()">🧪 Probar Conexión API</button>
+        <button onclick="clearCache()">🗑️ Limpiar Caché</button>
+        <button onclick="location.href='/#/login'">🏠 Ir a Login</button>
+    </div>
+
+    <script src="config.js?v=2"></script>
+    <script>
+        // Mostrar configuración actual
+        function showConfig() {
+            const info = document.getElementById('config-info');
+            info.innerHTML = `
+                <h2>📋 Configuración Actual</h2>
+                <div class="status info">
+                    <strong>Hostname:</strong> ${window.location.hostname}<br>
+                    <strong>API URL:</strong> ${window.APP_CONFIG.API_URL}<br>
+                    <strong>Environment:</strong> ${window.APP_CONFIG.ENVIRONMENT}<br>
+                    <strong>Timestamp:</strong> ${new Date().toISOString()}
+                </div>
+                <pre>${JSON.stringify(window.APP_CONFIG, null, 2)}</pre>
+            `;
+        }
+
+        // Probar conexión a la API
+        async function testAPI() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div class="status info">⏳ Probando conexión...</div>';
+            
+            try {
+                const healthUrl = window.APP_CONFIG.API_URL.replace('/api', '/health');
+                console.log('Testing:', healthUrl);
+                
+                const response = await fetch(healthUrl);
+                const data = await response.json();
+                
+                results.innerHTML = `
+                    <h2>✅ Conexión Exitosa</h2>
+                    <div class="status success">
+                        El backend está respondiendo correctamente
+                    </div>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                results.innerHTML = `
+                    <h2>❌ Error de Conexión</h2>
+                    <div class="status error">
+                        <strong>Error:</strong> ${error.message}<br><br>
+                        <strong>Posibles causas:</strong><br>
+                        • El backend no está corriendo<br>
+                        • El puerto 3070 está bloqueado<br>
+                        • DuckDNS no apunta a tu IP correcta<br>
+                        • Firewall bloqueando la conexión
+                    </div>
+                    <pre>${error.stack}</pre>
+                `;
+            }
+        }
+
+        // Limpiar caché y recargar
+        function clearCache() {
+            if (confirm('¿Limpiar caché y recargar la página?')) {
+                // Limpiar localStorage
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Recargar sin caché
+                window.location.reload(true);
+            }
+        }
+
+        // Ejecutar al cargar
+        showConfig();
+    </script>
+</body>
+</html>

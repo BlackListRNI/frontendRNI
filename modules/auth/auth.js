@@ -17,8 +17,14 @@ window.AuthModule = {
 
                     <div class="form-group">
                         <label class="form-label">Contraseña</label>
-                        <input type="password" name="password" class="form-input" required 
-                               placeholder="••••••••">
+                        <div style="position: relative;">
+                            <input type="password" name="password" id="loginPassword" class="form-input" required 
+                                   placeholder="••••••••" style="padding-right: 45px;">
+                            <button type="button" onclick="window.AuthModule.togglePassword('loginPassword', this)" 
+                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 5px;">
+                                👁️
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group mt-2">
@@ -72,14 +78,26 @@ window.AuthModule = {
 
                     <div class="form-group">
                         <label class="form-label">Contraseña</label>
-                        <input type="password" name="password" class="form-input" required 
-                               minlength="6" placeholder="Mínimo 6 caracteres">
+                        <div style="position: relative;">
+                            <input type="password" name="password" id="registerPassword" class="form-input" required 
+                                   minlength="6" placeholder="Mínimo 6 caracteres" style="padding-right: 45px;">
+                            <button type="button" onclick="window.AuthModule.togglePassword('registerPassword', this)" 
+                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 5px;">
+                                👁️
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Confirmar Contraseña</label>
-                        <input type="password" name="confirmPassword" class="form-input" required 
-                               placeholder="Repite tu contraseña">
+                        <div style="position: relative;">
+                            <input type="password" name="confirmPassword" id="confirmPassword" class="form-input" required 
+                                   placeholder="Repite tu contraseña" style="padding-right: 45px;">
+                            <button type="button" onclick="window.AuthModule.togglePassword('confirmPassword', this)" 
+                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 5px;">
+                                👁️
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group mt-2">
@@ -194,6 +212,18 @@ window.AuthModule = {
             const btn = form.querySelector('button[type="submit"]');
             btn.disabled = false;
             btn.textContent = 'Crear Cuenta';
+        }
+    },
+
+    // Toggle password visibility
+    togglePassword(inputId, button) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            button.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            button.textContent = '👁️';
         }
     },
 

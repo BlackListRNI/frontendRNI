@@ -15,8 +15,8 @@
             environment: 'development'
         },
         
-        // Production on DuckDNS
-        'coquettecraft.duckdns.org': {
+        // Production on Netlify
+        'registronacionaldeinfieles.netlify.app': {
             apiUrl: 'http://coquettecraft.duckdns.org:3070/api',
             environment: 'production'
         }

@@ -2,7 +2,7 @@
   "name": "Lista Negra de Infieles",
   "short_name": "Lista Negra",
   "description": "Registro comunitario de casos de infidelidad verificados",
-  "start_url": "/",
+  "start_url": "https://registronacionaldeinfieles.netlify.app/",
   "display": "standalone",
   "background_color": "#fdfbf7",
   "theme_color": "#4a0e16",

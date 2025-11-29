@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>http://coquettecraft.duckdns.org:3050/</loc>
+        <loc>https://registronacionaldeinfieles.netlify.app/</loc>
         <lastmod>2025-11-29</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>http://coquettecraft.duckdns.org:3050/#/registrar</loc>
+        <loc>https://registronacionaldeinfieles.netlify.app/#/registrar</loc>
         <lastmod>2025-11-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>http://coquettecraft.duckdns.org:3050/#/login</loc>
+        <loc>https://registronacionaldeinfieles.netlify.app/#/login</loc>
         <lastmod>2025-11-29</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>

@@ -6,7 +6,7 @@ Disallow: /api/
 Disallow: /admin/
 
 # Sitemap
-Sitemap: http://coquettecraft.duckdns.org:3050/sitemap.xml
+Sitemap: https://registronacionaldeinfieles.netlify.app/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1

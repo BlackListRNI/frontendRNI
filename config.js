@@ -14,16 +14,16 @@
             environment: 'development'
         },
         
-        // Production on Netlify - ALWAYS use DuckDNS backend
+        // Production on Netlify - ALWAYS use DuckDNS backend with HTTPS
         'registronacionaldeinfieles.netlify.app': {
-            apiUrl: 'http://coquettecraft.duckdns.org:3070/api',
+            apiUrl: 'https://coquettecraft.duckdns.org/api',
             environment: 'production'
         }
     };
     
     // Get config or use default production
     let config = configs[hostname] || {
-        apiUrl: 'http://coquettecraft.duckdns.org:3070/api',
+        apiUrl: 'https://coquettecraft.duckdns.org/api',
         environment: 'production'
     };
     

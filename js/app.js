@@ -97,11 +97,10 @@ const App = {
       TabSync.init(this.currentCountry);
     }
     
-    // Inicializar P2P Mesh en background
-    // Los errores son normales hasta que el servidor se actualice
-    if (typeof P2PMesh !== 'undefined') {
-      P2PMesh.init(this.currentCountry).catch(error => {
-        console.log('P2P Mesh esperando servidor actualizado...');
+    // Inicializar P2P Simple en background
+    if (typeof P2PSimple !== 'undefined') {
+      P2PSimple.init(this.currentCountry).catch(error => {
+        console.log('P2P en background, continuando...');
       });
     }
   },

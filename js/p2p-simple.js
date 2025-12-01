@@ -88,22 +88,20 @@ const P2PSimple = {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log(`📢 ${this.country}: ${result.totalPeers} peers, ${result.totalRecords} registros en red`);
 
-                // Si hay otros peers con más datos, sincronizar
-                if (result.totalRecords > recordCount) {
+                // Solo log si hay cambios significativos
+                if (result.totalRecords > recordCount + 10) {
+                    console.log(`📢 Red: ${result.totalPeers} peers, ${result.totalRecords} registros disponibles`);
                     await this.requestDataFromPeers();
                 }
             }
         } catch (error) {
-            console.warn('⚠️ No se pudo anunciar');
+            // Silencioso
         }
     },
 
     async requestDataFromPeers() {
         try {
-            console.log('🔄 Solicitando datos de otros peers...');
-
             const response = await fetch(`${API.baseURL}/api/data/request`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -116,15 +114,11 @@ const P2PSimple = {
                 const result = await response.json();
 
                 if (result.peers && result.peers.length > 0) {
-                    console.log(`✅ Encontrados ${result.peers.length} peers con datos`);
-                    // En un sistema P2P real, aquí se conectaría directamente con esos peers
-                    // Por ahora, usamos el servidor como intermediario
-                } else {
-                    console.log('⚠️ No hay peers con datos disponibles');
+                    console.log(`✅ ${result.peers.length} peers con datos`);
                 }
             }
         } catch (error) {
-            console.error('Error solicitando datos:', error);
+            // Silencioso
         }
     },
 

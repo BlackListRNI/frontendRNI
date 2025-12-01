@@ -7,7 +7,7 @@ const App = {
   // Helper para cargar datos SIEMPRE desde IndexedDB primero
   async loadDataSafe(country) {
     let data = { records: [], threads: {} };
-    
+
     if (typeof IndexedDBStorage !== 'undefined') {
       try {
         data = await IndexedDBStorage.loadData(country);
@@ -18,14 +18,14 @@ const App = {
     } else {
       data = Utils.getLocalData(country);
     }
-    
+
     // Asegurar estructura
     if (!data.records) data.records = [];
     if (!data.threads) data.threads = {};
-    
+
     return data;
   },
-  
+
   // Helper para guardar datos SIEMPRE en ambos lugares
   async saveDataSafe(country, data) {
     // Guardar en IndexedDB
@@ -36,42 +36,37 @@ const App = {
         console.error('Error guardando en IndexedDB:', error);
       }
     }
-    
+
     // Guardar en localStorage (backup)
     Utils.saveLocalData(country, data);
   },
 
   async init() {
     this.userId = Utils.getUserId();
-    
+
     // Inicializar IndexedDB
     try {
       await IndexedDBStorage.init();
-      
-      // Migrar datos de localStorage a IndexedDB (solo una vez)
-      if (!localStorage.getItem('indexeddb_migrated')) {
-        await IndexedDBStorage.migrateFromLocalStorage();
-      }
     } catch (error) {
       console.error('Error inicializando IndexedDB:', error);
       UI.showToast('⚠️ Usando almacenamiento de respaldo', 'info');
     }
-    
+
     const countryDetected = await this.detectAndSetCountry();
-    
+
     // Si no se detectó el país, ocultar loading y salir
     if (!countryDetected) {
       this.hideLoadingScreen();
       return;
     }
-    
+
     // Limpiar duplicados al iniciar (solo una vez por sesión)
     if (!sessionStorage.getItem('dedup_done')) {
       console.log('🧹 Limpiando duplicados...');
       Deduplicator.cleanAllLocalStorage();
       sessionStorage.setItem('dedup_done', 'true');
     }
-    
+
     // Inicializar solo si estamos en la página principal
     if (typeof Filters !== 'undefined') {
       Filters.init(); // Inicializar sistema de filtros
@@ -79,22 +74,22 @@ const App = {
     if (typeof Pagination !== 'undefined') {
       Pagination.init(); // Inicializar sistema de paginación
     }
-    
+
     // Cargar datos locales INMEDIATAMENTE (sin esperar sincronización)
     await this.loadLocalData();
     this.setupEventListeners();
-    
+
     // Ocultar loading screen SIEMPRE
     this.hideLoadingScreen();
-    
+
     // P2P Simple maneja la sincronización automáticamente
     console.log('💾 P2P Simple: Sincronización automática cada 60 seg');
-    
+
     // Inicializar sincronización entre pestañas
     if (typeof TabSync !== 'undefined') {
       TabSync.init(this.currentCountry);
     }
-    
+
     // Inicializar P2P Simple en background
     if (typeof P2PSimple !== 'undefined') {
       P2PSimple.init(this.currentCountry).catch(error => {
@@ -116,7 +111,7 @@ const App = {
 
   async detectAndSetCountry() {
     const savedCountry = localStorage.getItem('selectedCountry');
-    
+
     if (savedCountry) {
       this.currentCountry = savedCountry;
       const countrySelect = document.getElementById('country-select');
@@ -125,10 +120,10 @@ const App = {
       }
       return true;
     }
-    
+
     // Intentar detectar país
     UI.showToast('🌍 Detectando tu ubicación...', 'info');
-    
+
     try {
       const detectedCountry = await Utils.detectCountryByIP();
       this.currentCountry = detectedCountry;
@@ -198,14 +193,14 @@ const App = {
         btnSync.innerHTML = '🔄 Sincronizando...';
         btnSync.style.opacity = '0.6';
         btnSync.style.cursor = 'wait';
-        
+
         try {
           await this.syncWithServer();
-          
+
           // Feedback de éxito
           btnSync.innerHTML = '✅ Sincronizado';
           btnSync.style.opacity = '1';
-          
+
           // Restaurar después de 2 segundos
           setTimeout(() => {
             btnSync.innerHTML = originalHTML;
@@ -216,7 +211,7 @@ const App = {
           // Feedback de error
           btnSync.innerHTML = '❌ Error';
           btnSync.style.opacity = '1';
-          
+
           setTimeout(() => {
             btnSync.innerHTML = originalHTML;
             btnSync.disabled = false;
@@ -260,17 +255,17 @@ const App = {
   async loadLocalData() {
     let data = { records: [], threads: {} };
     const startTime = performance.now();
-    
+
     // 1. Intentar cargar desde IndexedDB
     if (typeof IndexedDBStorage !== 'undefined') {
       try {
         const idbData = await IndexedDBStorage.loadData(this.currentCountry);
-        
+
         if (idbData && idbData.records && idbData.records.length > 0) {
           const loadTime = Math.round(performance.now() - startTime);
           console.log(`✅ ${idbData.records.length} registros cargados en ${loadTime}ms`);
           data = idbData;
-          
+
           if (typeof Filters !== 'undefined') {
             Filters.setRecords(data.records);
           }
@@ -280,11 +275,11 @@ const App = {
         console.error('Error cargando desde IndexedDB:', error);
       }
     }
-    
+
     // 2. Fallback: localStorage
     console.log('📦 Fallback: Cargando desde localStorage...');
     data = Utils.getLocalData(this.currentCountry);
-    
+
     if (data.records && data.records.length > 0) {
       console.log(`✅ ${data.records.length} registros cargados desde localStorage`);
       if (typeof Filters !== 'undefined') {
@@ -315,7 +310,7 @@ const App = {
     const formData = new FormData(form);
     const allowFieldEdits = formData.get('allowFieldEdits') === 'on';
     const commentCooldown = parseInt(formData.get('commentCooldown')) || 3600000; // 1 hora por defecto
-    
+
     const record = {
       nombres: formData.get('nombres').trim(),
       apellidos: formData.get('apellidos').trim(),
@@ -346,57 +341,57 @@ const App = {
 
     try {
       const result = await API.submitRecord(this.currentCountry, record);
-      
+
       record.id = result.recordId;
       record.createdAt = Date.now();
       record.creatorId = this.userId;
-      
+
       // Solo permitir ediciones si el usuario lo activó
       if (allowFieldEdits) {
         record.editableFields = ['ocupacion', 'ets', 'tiempoRelacion', 'periodoInfidelidad', 'datosAdicionales', 'instagram'];
       } else {
         record.editableFields = [];
       }
-      
+
       // CRÍTICO: Cargar datos de forma segura
       const data = await this.loadDataSafe(this.currentCountry);
-      
+
       console.log(`📊 Antes de agregar: ${data.records.length} registros`);
-      
+
       data.records.push(record);
-      data.threads[record.id] = { 
-        comments: [], 
+      data.threads[record.id] = {
+        comments: [],
         votes: { approve: 0, reject: 0 },
         fieldProposals: {}
       };
       data.lastUpdate = Date.now();
-      
+
       console.log(`📊 Después de agregar: ${data.records.length} registros`);
-      
+
       // Guardar de forma segura
       await this.saveDataSafe(this.currentCountry, data);
-      
+
       // Actualizar UI
       if (typeof Filters !== 'undefined') {
         Filters.setRecords(data.records);
       } else {
         UI.renderTable(data.records);
       }
-      
+
       UI.closeModal();
       UI.showToast('✅ Infiel publicado exitosamente', 'success');
       this.syncWithServer();
-      
+
       // Notificar a otras pestañas
       if (typeof TabSync !== 'undefined') {
         TabSync.notifyNewRecord(record, this.currentCountry);
       }
-      
+
       // Broadcast a red P2P
       if (typeof P2PMesh !== 'undefined' && P2PMesh.isInitialized) {
         P2PMesh.broadcastNewRecord(record);
       }
-      
+
       // Restaurar botón (aunque el modal se cierra, por si acaso)
       submitBtn.disabled = false;
       submitBtn.textContent = originalText;
@@ -408,7 +403,7 @@ const App = {
       submitBtn.textContent = originalText;
       submitBtn.style.opacity = '1';
       submitBtn.style.cursor = 'pointer';
-      
+
       // Manejar errores específicos de rate limiting y duplicados
       if (error.status === 429) {
         UI.showToast(error.message || '⏱️ Debes esperar antes de publicar otro infiel', 'error');
@@ -500,11 +495,11 @@ const App = {
   checkAndUpdateVoteButtons(recordId) {
     const voteKey = `vote_${this.currentCountry}_${recordId}`;
     const hasVoted = localStorage.getItem(voteKey);
-    
+
     const btnApprove = document.getElementById('btn-approve');
     const btnReject = document.getElementById('btn-reject');
     const voteContainer = btnApprove.parentElement;
-    
+
     if (hasVoted) {
       // Ocultar botones y mostrar mensaje
       voteContainer.innerHTML = `
@@ -527,7 +522,7 @@ const App = {
           <span id="reject-count" class="vote-count">${document.getElementById('reject-count').textContent}</span>
         </button>
       `;
-      
+
       // Re-agregar event listeners
       document.getElementById('btn-approve').addEventListener('click', () => {
         this.vote('approve');
@@ -584,38 +579,38 @@ const App = {
       } else {
         data = Utils.getLocalData(this.currentCountry);
       }
-      
+
       // Asegurar que threads existe
       if (!data.threads) {
         data.threads = {};
       }
-      
+
       data.threads[this.currentRecordId] = result.thread;
       data.lastUpdate = Date.now();
-      
+
       // Guardar en ambos lugares
       if (typeof IndexedDBStorage !== 'undefined') {
         await IndexedDBStorage.saveData(this.currentCountry, data);
       }
       Utils.saveLocalData(this.currentCountry, data);
-      
+
       // Registrar que el usuario comentó (rate limiting)
       CommentRateLimit.recordComment(this.currentRecordId, this.userId);
-      
+
       // Notificar a otras pestañas
       if (typeof TabSync !== 'undefined') {
         TabSync.notifyNewComment(this.currentRecordId, result.thread, this.currentCountry);
       }
-      
+
       // Renderizar solo 5 comentarios más recientes
       UI.renderComments(result.thread.comments, 5);
       form.reset();
-      
+
       // Feedback de éxito
       submitBtn.innerHTML = '✅ Publicado';
       submitBtn.style.opacity = '1';
       UI.showToast('Comentario publicado', 'success');
-      
+
       // Restaurar botón
       setTimeout(() => {
         submitBtn.innerHTML = originalHTML;
@@ -626,7 +621,7 @@ const App = {
       submitBtn.innerHTML = originalHTML;
       submitBtn.disabled = false;
       submitBtn.style.opacity = '1';
-      
+
       // Manejar error de rate limiting del servidor
       if (error.status === 429) {
         UI.showToast(error.message || '⏱️ Debes esperar para comentar de nuevo', 'error');
@@ -638,14 +633,14 @@ const App = {
 
   async vote(voteType) {
     if (!this.currentRecordId) return;
-    
+
     // Verificar si ya votó
     const voteKey = `vote_${this.currentCountry}_${this.currentRecordId}`;
     if (localStorage.getItem(voteKey)) {
       UI.showToast('Ya votaste en este caso', 'error');
       return;
     }
-    
+
     // Deshabilitar botones para prevenir múltiples clicks
     const btnApprove = document.getElementById('btn-approve');
     const btnReject = document.getElementById('btn-reject');
@@ -671,44 +666,44 @@ const App = {
       } else {
         data = Utils.getLocalData(this.currentCountry);
       }
-      
+
       if (!data.threads) {
         data.threads = {};
       }
       if (!data.threads[this.currentRecordId]) {
         data.threads[this.currentRecordId] = { comments: [], votes: { approve: 0, reject: 0 } };
       }
-      
+
       data.threads[this.currentRecordId].votes = result.votes;
       data.lastUpdate = Date.now();
-      
+
       // Guardar en ambos lugares
       if (typeof IndexedDBStorage !== 'undefined') {
         await IndexedDBStorage.saveData(this.currentCountry, data);
       }
       Utils.saveLocalData(this.currentCountry, data);
-      
+
       // Guardar que el usuario ya votó
       localStorage.setItem(voteKey, voteType);
-      
+
       // Notificar a otras pestañas
       if (typeof TabSync !== 'undefined') {
         TabSync.notifyNewVote(this.currentRecordId, result.votes, this.currentCountry);
       }
-      
+
       document.getElementById('approve-count').textContent = result.votes.approve;
       document.getElementById('reject-count').textContent = result.votes.reject;
-      
+
       // Actualizar balanza visual
       this.renderModalVoteBalance(result.votes);
-      
+
       UI.showToast(
         voteType === 'approve' ? 'Voto de aprobación registrado' : 'Voto de refutación registrado',
         'success'
       );
-      
+
       this.loadLocalData();
-      
+
       // Ocultar botones y mostrar mensaje
       this.checkAndUpdateVoteButtons(this.currentRecordId);
     } catch (error) {
@@ -720,47 +715,49 @@ const App = {
   },
 
   async syncWithServer() {
-    // P2PSimple maneja la sincronización automáticamente
-    console.log('💾 Sincronización delegada a P2PSimple');
-    
+    console.log('💾 Sincronizando...');
+
     try {
-      // Forzar sincronización si P2PSimple está disponible
       if (typeof P2PSimple !== 'undefined' && P2PSimple.isInitialized) {
         await P2PSimple.forceSync();
+        
+        // Recargar datos después de sincronizar
+        await this.loadLocalData();
+        
         UI.showToast('✅ Sincronización completada', 'success');
       } else {
         UI.showToast('⚠️ P2P no inicializado', 'warning');
       }
     } catch (error) {
       console.error('Error en sincronización:', error);
-      UI.showToast('Error de conexión. Trabajando en modo offline', 'error');
+      UI.showToast('Error de conexión', 'error');
     }
   },
 
   mergeData(localData, serverData) {
     const localCount = localData.records?.length || 0;
     const serverCount = serverData.records?.length || 0;
-    
+
     console.log(`📊 Merge: Local=${localCount}, Servidor=${serverCount}`);
-    
+
     // VALIDACIÓN: Si el servidor tiene MENOS datos que el cliente
     // probablemente se reinició y perdió datos
     if (serverCount > 0 && localCount > serverCount) {
       const difference = localCount - serverCount;
       const percentageLoss = (difference / localCount) * 100;
-      
+
       // Si perdió más del 10% de datos, es sospechoso
       if (percentageLoss > 10) {
         console.warn(`⚠️ ALERTA: Servidor tiene ${difference} registros menos (${percentageLoss.toFixed(1)}% pérdida)`);
         console.warn(`⚠️ Posible reinicio del servidor. Manteniendo datos locales.`);
-        
+
         // Mantener datos locales y agregar solo nuevos del servidor
         const merged = {
           records: [...localData.records],
           threads: { ...localData.threads },
           lastUpdate: Math.max(localData.lastUpdate || 0, serverData.lastUpdate || 0)
         };
-        
+
         // Agregar solo registros NUEVOS del servidor (que no tenemos)
         const localRecordsMap = new Map(localData.records.map(r => [r.id, r]));
         serverData.records.forEach(serverRecord => {
@@ -769,19 +766,19 @@ const App = {
             merged.records.push(serverRecord);
           }
         });
-        
+
         // Merge threads
         Object.keys(serverData.threads).forEach(recordId => {
           if (!merged.threads[recordId]) {
             merged.threads[recordId] = serverData.threads[recordId];
           }
         });
-        
+
         console.log(`✅ Merge protegido: ${merged.records.length} registros totales`);
         return merged;
       }
     }
-    
+
     // MERGE NORMAL: Servidor tiene más o igual datos
     const merged = {
       records: [],
@@ -791,10 +788,10 @@ const App = {
 
     // Crear mapa de registros del servidor
     const serverRecordsMap = new Map(serverData.records.map(r => [r.id, r]));
-    
+
     // Agregar todos los registros del servidor
     merged.records = [...serverData.records];
-    
+
     // Agregar registros locales que no están en el servidor (pendientes de sync)
     localData.records.forEach(localRecord => {
       if (!serverRecordsMap.has(localRecord.id)) {
@@ -805,7 +802,7 @@ const App = {
 
     // Merge de threads
     merged.threads = { ...serverData.threads };
-    
+
     // Agregar threads locales que no están en el servidor
     Object.keys(localData.threads).forEach(recordId => {
       if (!merged.threads[recordId]) {
@@ -832,22 +829,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.warn('⚠️ Timeout: Ocultando loading screen por seguridad');
     App.hideLoadingScreen();
   }, 10000);
-  
+
   try {
     // Esperar a que GeoBlock verifique el acceso
     const isAllowed = await GeoBlock.init();
-    
+
     // Si no está permitido, GeoBlock ya mostró el mensaje de bloqueo
     if (!isAllowed) {
       clearTimeout(safetyTimeout);
       App.hideLoadingScreen();
       return;
     }
-    
+
     // Si está permitido, inicializar la app
     await App.init();
     clearTimeout(safetyTimeout);
-    
+
   } catch (error) {
     console.error('Error en inicialización:', error);
     clearTimeout(safetyTimeout);

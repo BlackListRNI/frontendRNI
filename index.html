@@ -149,299 +149,297 @@
           <div class="warning-card-body">
             <h3 class="warning-card-title" style="color: var(--primary-pink); cursor: pointer;"
               onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-              🚀 ¿Quieres que la página vaya más rápida? (Click aquí)
+              🚀 ¿Quieres que la página vaya más rápida? (Click para cerrar)
             </h3>
-            <div class="warning-card-text" style="color: var(--elegant-black); display: none;">
-              <p style="margin: 0;">
-                Tenemos un <strong>servidor de respaldo más rápido</strong>:
-                <br><br>
-                👉 <strong><a href="http://coquettecraft.duckdns.org:3050/" target="_blank" rel="noopener noreferrer"
-                    style="color: var(--dark-pink); text-decoration: underline; font-size: 1.1em;">Ir al servidor
-                    rápido</a></strong>
-                <br><br>
-                <strong style="color: #ff9800;">⚠️ Tu navegador dirá "No es seguro"</strong> porque no tiene HTTPS.
-                <br><br>
-                <strong style="color: var(--primary-pink);">✅ Pero es seguro porque:</strong>
-                <br>
-                • No hay cuentas ni login
-                <br>
-                • No pedimos datos personales
-                <br>
-                • Todo es anónimo y público
-                <br><br>
-                Solo haz click en <strong>"Continuar al sitio"</strong> cuando aparezca la advertencia.
-                <br><br>
-                <small style="color: #666;">Si prefieres quedarte aquí, está bien.</small>
-              </p>
-            </div>
-            <br><br>
-            <strong style="color: var(--primary-pink);">🔒 Privacidad y Legalidad:</strong> Este es un sitio de
-            <strong>anécdotas anónimas</strong>. Los usuarios son responsables del contenido que publican. La
-            plataforma NO verifica identidades ni datos. <strong>Totalmente anónimo.</strong> No recopilamos
-            información personal identificable.
+            <div class="warning-card-text" style="color: var(--elegant-black); display: block;"></div>
+            <p style="margin: 0;">
+              Tenemos un <strong>servidor de respaldo más rápido</strong>:
+              <br><br>
+              👉 <strong><a href="http://coquettecraft.duckdns.org:3050/" target="_blank" rel="noopener noreferrer"
+                  style="color: var(--dark-pink); text-decoration: underline; font-size: 1.1em;">Ir al servidor
+                  rápido</a></strong>
+              <br><br>
+              <strong style="color: #ff9800;">⚠️ Tu navegador dirá "No es seguro"</strong> porque no tiene HTTPS.
+              <br><br>
+              <strong style="color: var(--primary-pink);">✅ Pero es seguro porque:</strong>
+              <br>
+              • No hay cuentas ni login
+              <br>
+              • No pedimos datos personales
+              <br>
+              • Todo es anónimo y público
+              <br><br>
+              Solo haz click en <strong>"Continuar al sitio"</strong> cuando aparezca la advertencia.
+              <br><br>
+              <small style="color: #666;">Si prefieres quedarte aquí, está bien.</small>
             </p>
           </div>
+          <br><br>
+          <strong style="color: var(--primary-pink);">🔒 Privacidad y Legalidad:</strong> Este es un sitio de
+          <strong>anécdotas anónimas</strong>. Los usuarios son responsables del contenido que publican. La
+          plataforma NO verifica identidades ni datos. <strong>Totalmente anónimo.</strong> No recopilamos
+          información personal identificable.
+          </p>
         </div>
       </div>
+    </div>
 
-      <div class="actions-bar">
-        <button id="btn-new-record" class="btn-primary">
-          <span class="icon">💔</span>
-          <span class="btn-text">Nuevo Infiel</span>
+    <div class="actions-bar">
+      <button id="btn-new-record" class="btn-primary">
+        <span class="icon">💔</span>
+        <span class="btn-text">Nuevo Infiel</span>
+      </button>
+      <button id="btn-sync" class="btn-secondary">
+        <span class="icon">🔄</span>
+        <span class="btn-text">Sincronizar</span>
+      </button>
+      <button id="btn-toggle-filters" class="btn-secondary">
+        <span class="icon" id="filter-toggle-icon">🔽</span>
+        <span class="btn-text">Filtros</span>
+      </button>
+    </div>
+
+    <!-- Barra de búsqueda (siempre visible) -->
+    <div class="search-bar" style="margin-bottom: 20px;">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" class="search-input" placeholder="Buscar por nombre, apellido, ubicación...">
+      <button id="btn-clear-search" class="btn-clear-search" style="display: none;">✕</button>
+    </div>
+
+    <!-- Filtros (colapsables) -->
+    <div class="search-filter-container collapsed">
+
+      <!-- Botones de modo de filtro -->
+      <div class="filter-mode-buttons">
+        <button id="btn-simple-filters" class="filter-mode-btn active">
+          <span class="icon">⚡</span> Filtros Simples
         </button>
-        <button id="btn-sync" class="btn-secondary">
-          <span class="icon">🔄</span>
-          <span class="btn-text">Sincronizar</span>
+        <button id="btn-advanced-filters" class="filter-mode-btn">
+          <span class="icon">🎯</span> Filtros Avanzados
         </button>
-        <button id="btn-toggle-filters" class="btn-secondary">
-          <span class="icon" id="filter-toggle-icon">🔽</span>
-          <span class="btn-text">Filtros</span>
+        <button id="btn-clear-filters" class="btn-clear-all">
+          <span class="icon">🗑️</span> Limpiar Todo
         </button>
       </div>
 
-      <!-- Barra de búsqueda (siempre visible) -->
-      <div class="search-bar" style="margin-bottom: 20px;">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="search-input" class="search-input"
-          placeholder="Buscar por nombre, apellido, ubicación...">
-        <button id="btn-clear-search" class="btn-clear-search" style="display: none;">✕</button>
-      </div>
-
-      <!-- Filtros (colapsables) -->
-      <div class="search-filter-container collapsed">
-
-        <!-- Botones de modo de filtro -->
-        <div class="filter-mode-buttons">
-          <button id="btn-simple-filters" class="filter-mode-btn active">
-            <span class="icon">⚡</span> Filtros Simples
-          </button>
-          <button id="btn-advanced-filters" class="filter-mode-btn">
-            <span class="icon">🎯</span> Filtros Avanzados
-          </button>
-          <button id="btn-clear-filters" class="btn-clear-all">
-            <span class="icon">🗑️</span> Limpiar Todo
-          </button>
-        </div>
-
-        <!-- Filtros Simples -->
-        <div id="simple-filters" class="filters-panel active">
-          <div class="filters-grid">
-            <div class="filter-group">
-              <label>Estado del Caso</label>
-              <select id="filter-status" class="filter-select">
-                <option value="">Todos</option>
-                <option value="approved">Aprobado</option>
-                <option value="rejected">Refutado</option>
-                <option value="mixed">Variado</option>
-                <option value="pending">Pendiente</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label>Edad</label>
-              <select id="filter-age" class="filter-select">
-                <option value="">Todas</option>
-                <option value="18-25">18-25 años</option>
-                <option value="26-35">26-35 años</option>
-                <option value="36-45">36-45 años</option>
-                <option value="46+">46+ años</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label>Con Instagram</label>
-              <select id="filter-instagram" class="filter-select">
-                <option value="">Todos</option>
-                <option value="yes">Sí</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label>Con Datos Extra</label>
-              <select id="filter-extra" class="filter-select">
-                <option value="">Todos</option>
-                <option value="yes">Sí</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filtros Avanzados -->
-        <div id="advanced-filters" class="filters-panel">
-          <div class="filters-grid-advanced">
-            <div class="filter-group">
-              <label>Departamento</label>
-              <input type="text" id="filter-departamento" class="filter-input" placeholder="Ej: Lima">
-            </div>
-
-            <div class="filter-group">
-              <label>Distrito</label>
-              <input type="text" id="filter-distrito" class="filter-input" placeholder="Ej: Miraflores">
-            </div>
-
-            <div class="filter-group">
-              <label>Ocupación</label>
-              <input type="text" id="filter-ocupacion" class="filter-input" placeholder="Ej: Ingeniero">
-            </div>
-
-            <div class="filter-group">
-              <label>ETS</label>
-              <select id="filter-ets" class="filter-select">
-                <option value="">Todos</option>
-                <option value="Sí">Sí</option>
-                <option value="No">No</option>
-                <option value="Desconocido">Desconocido</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label>Edad Mínima</label>
-              <input type="number" id="filter-age-min" class="filter-input" placeholder="18" min="18" max="99">
-            </div>
-
-            <div class="filter-group">
-              <label>Edad Máxima</label>
-              <input type="number" id="filter-age-max" class="filter-input" placeholder="99" min="18" max="99">
-            </div>
-
-            <div class="filter-group">
-              <label>Ordenar Por</label>
-              <select id="filter-sort" class="filter-select">
-                <option value="recent">Más Recientes</option>
-                <option value="oldest">Más Antiguos</option>
-                <option value="age-asc">Edad (Menor a Mayor)</option>
-                <option value="age-desc">Edad (Mayor a Menor)</option>
-                <option value="name-asc">Nombre (A-Z)</option>
-                <option value="name-desc">Nombre (Z-A)</option>
-                <option value="votes-desc">Más Votados</option>
-              </select>
-            </div>
-
-            <div class="filter-group">
-              <label>Con Foto</label>
-              <select id="filter-photo" class="filter-select">
-                <option value="">Todos</option>
-                <option value="yes">Sí</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Contador de resultados -->
-        <div class="results-counter">
-          <span id="results-count">0 resultados</span>
-          <span id="active-filters-count" style="display: none;"></span>
-        </div>
-      </div>
-
-      <div class="table-container">
-        <!-- Mini filtros rápidos -->
-        <div class="quick-filters">
-          <span class="quick-filters-label">Vista rápida:</span>
-          <div class="quick-filters-buttons">
-            <button class="quick-filter-btn active" data-filter="recent" onclick="applyQuickFilter('recent')">
-              <span class="filter-icon">🔥</span>
-              <span>Recientes</span>
-            </button>
-            <button class="quick-filter-btn" data-filter="popular" onclick="applyQuickFilter('popular')">
-              <span class="filter-icon">⭐</span>
-              <span>Populares</span>
-            </button>
-            <button class="quick-filter-btn" data-filter="oldest" onclick="applyQuickFilter('oldest')">
-              <span class="filter-icon">📅</span>
-              <span>Antiguos</span>
-            </button>
-            <button class="quick-filter-btn" data-filter="all" onclick="applyQuickFilter('all')">
-              <span class="filter-icon">📋</span>
-              <span>Todos</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="table-wrapper">
-          <table id="records-table" class="elegant-table">
-            <thead>
-              <tr>
-                <th style="min-width: 80px;">Dato Inventado</th>
-                <th data-sort="nombres" class="sortable" onclick="Filters.sortBy('nombres')"
-                  style="cursor: pointer; min-width: 120px;" title="Click para ordenar">Dato Inventado</th>
-                <th data-sort="apellidos" class="sortable" onclick="Filters.sortBy('apellidos')"
-                  style="cursor: pointer; min-width: 120px;" title="Click para ordenar">Dato Inventado</th>Inventado
-                <th data-sort="departamento" class="sortable" onclick="Filters.sortBy('departamento')"
-                  style="cursor: pointer; min-width: 120px;" title="Click para ordenar">Dato Inventado</th>
-                <th data-sort="distrito" class="sortable" onclick="Filters.sortBy('distrito')"
-                  style="cursor: pointer; min-width: 120px;" title="Click para ordenar">Dato Inventado</th>
-                <th data-sort="edad" class="sortable" onclick="Filters.sortBy('edad')"
-                  style="cursor: pointer; min-width: 80px;" title="Click para ordenar">Dato Inventado</th>
-                <th style="min-width: 100px;">Dato Inventado</th>
-                <th style="min-width: 100px;">Dato Inventado</th>
-                <th style="min-width: 100px;">Opiniones</th>
-                <th style="min-width: 120px;">Ver todo el chisme</th>
-              </tr>Inventado
-            </thead>
-            <tbody id="table-body">
-              <tr class="empty-state">
-                <td colspan="10">
-                  <div class="empty-message">
-                    <span class="empty-icon">💔</span>
-                    <p>No hay registros aún</p>
-                    <div
-                      style="margin-top: 15px; padding: 15px; background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.05)); border-radius: 8px; border-left: 4px solid #ff9800;">
-                      <p style="margin: 0; color: #e65100; font-size: 0.95rem; line-height: 1.6;">
-                        ⏳ <strong>¿Por qué no veo registros?</strong><br>
-                        El servidor está procesando los datos. Debido al presupuesto limitado, puede tardar unos minutos
-                        en cargar toda la información.<br><br>
-                        💡 <strong>Deja la página abierta unos minutos y los registros aparecerán
-                          automáticamente.</strong>
-                      </p>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Paginación -->
-        <div class="pagination-container">
-          <div class="pagination-info">
-            <span id="pagination-info-text">Mostrando 0 de 0 registros</span>
-          </div>
-          <div class="pagination-controls">
-            <button class="pagination-btn" id="btn-first-page" onclick="Pagination.goToPage(1)" title="Primera página">
-              ⏮️
-            </button>
-            <button class="pagination-btn" id="btn-prev-page" onclick="Pagination.previousPage()"
-              title="Página anterior">
-              ◀️
-            </button>
-
-            <div class="pagination-pages" id="pagination-pages">
-              <!-- Los números de página se generan dinámicamente -->
-            </div>
-
-            <button class="pagination-btn" id="btn-next-page" onclick="Pagination.nextPage()" title="Página siguiente">
-              ▶️
-            </button>
-            <button class="pagination-btn" id="btn-last-page" onclick="Pagination.goToLastPage()" title="Última página">
-              ⏭️
-            </button>
-          </div>
-          <div class="pagination-size">
-            <label for="page-size-select">Mostrar:</label>
-            <select id="page-size-select" class="page-size-select" onchange="Pagination.changePageSize(this.value)">
-              <option value="10">10</option>
-              <option value="25" selected>25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
+      <!-- Filtros Simples -->
+      <div id="simple-filters" class="filters-panel active">
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label>Estado del Caso</label>
+            <select id="filter-status" class="filter-select">
+              <option value="">Todos</option>
+              <option value="approved">Aprobado</option>
+              <option value="rejected">Refutado</option>
+              <option value="mixed">Variado</option>
+              <option value="pending">Pendiente</option>
             </select>
-            <span>por página</span>
+          </div>
+
+          <div class="filter-group">
+            <label>Edad</label>
+            <select id="filter-age" class="filter-select">
+              <option value="">Todas</option>
+              <option value="18-25">18-25 años</option>
+              <option value="26-35">26-35 años</option>
+              <option value="36-45">36-45 años</option>
+              <option value="46+">46+ años</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Con Instagram</label>
+            <select id="filter-instagram" class="filter-select">
+              <option value="">Todos</option>
+              <option value="yes">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Con Datos Extra</label>
+            <select id="filter-extra" class="filter-select">
+              <option value="">Todos</option>
+              <option value="yes">Sí</option>
+              <option value="no">No</option>
+            </select>
           </div>
         </div>
       </div>
+
+      <!-- Filtros Avanzados -->
+      <div id="advanced-filters" class="filters-panel">
+        <div class="filters-grid-advanced">
+          <div class="filter-group">
+            <label>Departamento</label>
+            <input type="text" id="filter-departamento" class="filter-input" placeholder="Ej: Lima">
+          </div>
+
+          <div class="filter-group">
+            <label>Distrito</label>
+            <input type="text" id="filter-distrito" class="filter-input" placeholder="Ej: Miraflores">
+          </div>
+
+          <div class="filter-group">
+            <label>Ocupación</label>
+            <input type="text" id="filter-ocupacion" class="filter-input" placeholder="Ej: Ingeniero">
+          </div>
+
+          <div class="filter-group">
+            <label>ETS</label>
+            <select id="filter-ets" class="filter-select">
+              <option value="">Todos</option>
+              <option value="Sí">Sí</option>
+              <option value="No">No</option>
+              <option value="Desconocido">Desconocido</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Edad Mínima</label>
+            <input type="number" id="filter-age-min" class="filter-input" placeholder="18" min="18" max="99">
+          </div>
+
+          <div class="filter-group">
+            <label>Edad Máxima</label>
+            <input type="number" id="filter-age-max" class="filter-input" placeholder="99" min="18" max="99">
+          </div>
+
+          <div class="filter-group">
+            <label>Ordenar Por</label>
+            <select id="filter-sort" class="filter-select">
+              <option value="recent">Más Recientes</option>
+              <option value="oldest">Más Antiguos</option>
+              <option value="age-asc">Edad (Menor a Mayor)</option>
+              <option value="age-desc">Edad (Mayor a Menor)</option>
+              <option value="name-asc">Nombre (A-Z)</option>
+              <option value="name-desc">Nombre (Z-A)</option>
+              <option value="votes-desc">Más Votados</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Con Foto</label>
+            <select id="filter-photo" class="filter-select">
+              <option value="">Todos</option>
+              <option value="yes">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contador de resultados -->
+      <div class="results-counter">
+        <span id="results-count">0 resultados</span>
+        <span id="active-filters-count" style="display: none;"></span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <!-- Mini filtros rápidos -->
+      <div class="quick-filters">
+        <span class="quick-filters-label">Vista rápida:</span>
+        <div class="quick-filters-buttons">
+          <button class="quick-filter-btn active" data-filter="recent" onclick="applyQuickFilter('recent')">
+            <span class="filter-icon">🔥</span>
+            <span>Recientes</span>
+          </button>
+          <button class="quick-filter-btn" data-filter="popular" onclick="applyQuickFilter('popular')">
+            <span class="filter-icon">⭐</span>
+            <span>Populares</span>
+          </button>
+          <button class="quick-filter-btn" data-filter="oldest" onclick="applyQuickFilter('oldest')">
+            <span class="filter-icon">📅</span>
+            <span>Antiguos</span>
+          </button>
+          <button class="quick-filter-btn" data-filter="all" onclick="applyQuickFilter('all')">
+            <span class="filter-icon">📋</span>
+            <span>Todos</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="records-table" class="elegant-table">
+          <thead>
+            <tr>
+              <th style="min-width: 80px;">Dato Inventado</th>
+              <th data-sort="nombres" class="sortable" onclick="Filters.sortBy('nombres')"
+                style="cursor: pointer; min-width: 120px;" title="Click para ordenar">Dato Inventado</th>
+              <th data-sort="apellidos" class="sortable" onclick="Filters.sortBy('apellidos')"
+                style="cursor: pointer; min-width: 120px;" title="Click para ordenar">Dato Inventado</th>Inventado
+              <th data-sort="departamento" class="sortable" onclick="Filters.sortBy('departamento')"
+                style="cursor: pointer; min-width: 120px;" title="Click para ordenar">Dato Inventado</th>
+              <th data-sort="distrito" class="sortable" onclick="Filters.sortBy('distrito')"
+                style="cursor: pointer; min-width: 120px;" title="Click para ordenar">Dato Inventado</th>
+              <th data-sort="edad" class="sortable" onclick="Filters.sortBy('edad')"
+                style="cursor: pointer; min-width: 80px;" title="Click para ordenar">Dato Inventado</th>
+              <th style="min-width: 100px;">Dato Inventado</th>
+              <th style="min-width: 100px;">Dato Inventado</th>
+              <th style="min-width: 100px;">Opiniones</th>
+              <th style="min-width: 120px;">Ver todo el chisme</th>
+            </tr>Inventado
+          </thead>
+          <tbody id="table-body">
+            <tr class="empty-state">
+              <td colspan="10">
+                <div class="empty-message">
+                  <span class="empty-icon">💔</span>
+                  <p>No hay registros aún</p>
+                  <div
+                    style="margin-top: 15px; padding: 15px; background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.05)); border-radius: 8px; border-left: 4px solid #ff9800;">
+                    <p style="margin: 0; color: #e65100; font-size: 0.95rem; line-height: 1.6;">
+                      ⏳ <strong>¿Por qué no veo registros?</strong><br>
+                      El servidor está procesando los datos. Debido al presupuesto limitado, puede tardar unos minutos
+                      en cargar toda la información.<br><br>
+                      💡 <strong>Deja la página abierta unos minutos y los registros aparecerán
+                        automáticamente.</strong>
+                    </p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination-container">
+        <div class="pagination-info">
+          <span id="pagination-info-text">Mostrando 0 de 0 registros</span>
+        </div>
+        <div class="pagination-controls">
+          <button class="pagination-btn" id="btn-first-page" onclick="Pagination.goToPage(1)" title="Primera página">
+            ⏮️
+          </button>
+          <button class="pagination-btn" id="btn-prev-page" onclick="Pagination.previousPage()" title="Página anterior">
+            ◀️
+          </button>
+
+          <div class="pagination-pages" id="pagination-pages">
+            <!-- Los números de página se generan dinámicamente -->
+          </div>
+
+          <button class="pagination-btn" id="btn-next-page" onclick="Pagination.nextPage()" title="Página siguiente">
+            ▶️
+          </button>
+          <button class="pagination-btn" id="btn-last-page" onclick="Pagination.goToLastPage()" title="Última página">
+            ⏭️
+          </button>
+        </div>
+        <div class="pagination-size">
+          <label for="page-size-select">Mostrar:</label>
+          <select id="page-size-select" class="page-size-select" onchange="Pagination.changePageSize(this.value)">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span>por página</span>
+        </div>
+      </div>
+    </div>
     </div>
 
     <!-- Sidebar derecho de publicidad -->

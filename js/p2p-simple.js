@@ -7,6 +7,7 @@ const P2PSimple = {
     myPeerId: null,
     syncInterval: null,
     isInitialized: false,
+    myData: null,
 
     async init(country) {
         if (this.isInitialized) return;
@@ -14,28 +15,54 @@ const P2PSimple = {
         this.country = country;
         this.myPeerId = `peer_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-        console.log(`📢 Iniciando P2P con chunks para ${country}`);
+        console.log(`📢 Iniciando P2P para ${country}`);
 
         // Inicializar IndexedDB
         await IndexedDBStorage.init();
 
-        // Inicializar ChunkManager
-        await ChunkManager.init(country);
+        // Cargar mis datos locales
+        await this.loadMyData();
 
-        // Sincronizar inmediatamente al iniciar
-        await this.syncChunks();
+        // Anunciar presencia inmediatamente
+        await this.announce();
 
-        // Sincronizar chunks cada 2 minutos
+        // Si no tengo datos, intentar obtenerlos de otros peers
+        if (!this.myData || this.myData.records.length === 0) {
+            await this.requestDataFromPeers();
+        }
+
+        // Sincronizar cada 2 minutos
         this.syncInterval = setInterval(() => {
-            this.syncChunks();
+            this.announce();
         }, 2 * 60 * 1000);
 
         this.isInitialized = true;
     },
 
+    async loadMyData() {
+        try {
+            // Intentar IndexedDB primero
+            this.myData = await IndexedDBStorage.loadData(this.country);
+            
+            if (!this.myData || !this.myData.records || this.myData.records.length === 0) {
+                // Fallback a localStorage
+                this.myData = Utils.getLocalData(this.country);
+            }
+            
+            if (!this.myData.records) {
+                this.myData = { records: [], threads: {} };
+            }
+            
+            console.log(`💾 Datos locales: ${this.myData.records.length} registros`);
+        } catch (error) {
+            console.error('Error cargando datos:', error);
+            this.myData = { records: [], threads: {} };
+        }
+    },
+
     async announce() {
         try {
-            const myChunks = Array.from(ChunkManager.myChunks);
+            const recordCount = this.myData?.records?.length || 0;
 
             const response = await fetch(`${API.baseURL}/api/announce`, {
                 method: 'POST',
@@ -43,45 +70,74 @@ const P2PSimple = {
                 body: JSON.stringify({
                     country: this.country,
                     peerId: this.myPeerId,
-                    chunks: myChunks
+                    recordCount: recordCount
                 })
             });
 
             if (response.ok) {
                 const result = await response.json();
-                console.log(`📢 ${this.country}: ${result.totalPeers} peers, ${result.totalChunks} chunks`);
+                console.log(`📢 ${this.country}: ${result.totalPeers} peers, ${result.totalRecords} registros en red`);
+                
+                // Si hay otros peers con más datos, sincronizar
+                if (result.totalRecords > recordCount) {
+                    await this.requestDataFromPeers();
+                }
             }
         } catch (error) {
             console.warn('⚠️ No se pudo anunciar');
         }
     },
 
-    async syncChunks() {
+    async requestDataFromPeers() {
         try {
-            console.log('🔄 Sincronizando chunks...');
+            console.log('🔄 Solicitando datos de otros peers...');
             
-            // Anunciar presencia primero
-            await this.announce();
-            
-            // Sincronizar con el servidor
-            const data = await ChunkManager.sync();
+            const response = await fetch(`${API.baseURL}/api/data/request`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    country: this.country
+                })
+            });
 
-            // Limpiar chunks viejos
-            await ChunkManager.cleanupOldChunks();
-
-            // Actualizar UI si está disponible
-            if (typeof Filters !== 'undefined' && data.records && data.records.length > 0) {
-                Filters.setRecords(data.records);
-                console.log(`✅ ${data.records.length} registros sincronizados`);
+            if (response.ok) {
+                const result = await response.json();
+                
+                if (result.peers && result.peers.length > 0) {
+                    console.log(`✅ Encontrados ${result.peers.length} peers con datos`);
+                    // En un sistema P2P real, aquí se conectaría directamente con esos peers
+                    // Por ahora, usamos el servidor como intermediario
+                } else {
+                    console.log('⚠️ No hay peers con datos disponibles');
+                }
             }
-
         } catch (error) {
-            console.error('Error sincronizando chunks:', error);
+            console.error('Error solicitando datos:', error);
+        }
+    },
+
+    async shareMyData() {
+        if (!this.myData || this.myData.records.length === 0) return;
+
+        try {
+            await fetch(`${API.baseURL}/api/data/share`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    country: this.country,
+                    peerId: this.myPeerId,
+                    sharedData: this.myData
+                })
+            });
+        } catch (error) {
+            console.error('Error compartiendo datos:', error);
         }
     },
 
     async forceSync() {
-        await this.syncChunks();
+        await this.loadMyData();
+        await this.announce();
+        await this.requestDataFromPeers();
     },
 
     disconnect() {
@@ -95,7 +151,7 @@ const P2PSimple = {
         return {
             peerId: this.myPeerId,
             country: this.country,
-            chunks: ChunkManager.myChunks.size,
+            records: this.myData?.records?.length || 0,
             isInitialized: this.isInitialized
         };
     }

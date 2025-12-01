@@ -147,41 +147,38 @@
           <div class="warning-card-icon"
             style="background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); color: white;">💡</div>
           <div class="warning-card-body">
-            <h3 class="warning-card-title" style="color: var(--primary-pink);">🚀 ¡Nos Mudamos a un Servidor Más Rápido!</h3>
-            <p class="warning-card-text" style="color: var(--elegant-black);">
-              <strong style="color: var(--dark-pink);">¿Quieres que la página vaya MUCHO más rápida?</strong>
-              <br><br>
-              Nos mudamos a un nuevo servidor de respaldo que es <strong>10x más rápido</strong>. 
-              <br><br>
-              👉 <strong><a href="http://coquettecraft.duckdns.org:3050/" target="_blank" rel="noopener noreferrer"
-                style="color: var(--dark-pink); text-decoration: underline; font-size: 1.1em;">Entra al servidor rápido aquí</a></strong>
-              <br><br>
-              <strong style="color: #ff9800;">⚠️ Importante:</strong> Tu navegador mostrará una advertencia de seguridad porque aún no tenemos certificado HTTPS (estamos en proceso). 
-              <br><br>
-              <strong>Dependiendo de tu navegador verás algo como:</strong>
-              <br>
-              • "Este sitio no es seguro" o "Not secure"
-              <br>
-              • "You are seeing this warning because this site does not support HTTPS"
-              <br><br>
-              <strong style="color: var(--primary-pink);">✅ Es seguro continuar porque:</strong>
-              <br>
-              • No hay cuentas ni login
-              <br>
-              • No pedimos datos personales
-              <br>
-              • Todo es anónimo
-              <br>
-              • Solo compartes anécdotas públicas
-              <br><br>
-              <strong>Haz click en "Continuar al sitio" o "Proceed anyway"</strong> y disfruta de la velocidad 🚀
-              <br><br>
-              Si prefieres quedarte en la versión lenta pero con HTTPS, puedes seguir usando esta página sin problema.
-              <br><br>
-              <strong style="color: var(--primary-pink);">🔒 Privacidad y Legalidad:</strong> Este es un sitio de
-              <strong>anécdotas anónimas</strong>. Los usuarios son responsables del contenido que publican. La
-              plataforma NO verifica identidades ni datos. <strong>Totalmente anónimo.</strong> No recopilamos
-              información personal identificable.
+            <h3 class="warning-card-title" style="color: var(--primary-pink); cursor: pointer;"
+              onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+              🚀 ¿Quieres que la página vaya más rápida? (Click aquí)
+            </h3>
+            <div class="warning-card-text" style="color: var(--elegant-black); display: none;">
+              <p style="margin: 0;">
+                Tenemos un <strong>servidor de respaldo más rápido</strong>:
+                <br><br>
+                👉 <strong><a href="http://coquettecraft.duckdns.org:3050/" target="_blank" rel="noopener noreferrer"
+                    style="color: var(--dark-pink); text-decoration: underline; font-size: 1.1em;">Ir al servidor
+                    rápido</a></strong>
+                <br><br>
+                <strong style="color: #ff9800;">⚠️ Tu navegador dirá "No es seguro"</strong> porque no tiene HTTPS.
+                <br><br>
+                <strong style="color: var(--primary-pink);">✅ Pero es seguro porque:</strong>
+                <br>
+                • No hay cuentas ni login
+                <br>
+                • No pedimos datos personales
+                <br>
+                • Todo es anónimo y público
+                <br><br>
+                Solo haz click en <strong>"Continuar al sitio"</strong> cuando aparezca la advertencia.
+                <br><br>
+                <small style="color: #666;">Si prefieres quedarte aquí, está bien.</small>
+              </p>
+            </div>
+            <br><br>
+            <strong style="color: var(--primary-pink);">🔒 Privacidad y Legalidad:</strong> Este es un sitio de
+            <strong>anécdotas anónimas</strong>. Los usuarios son responsables del contenido que publican. La
+            plataforma NO verifica identidades ni datos. <strong>Totalmente anónimo.</strong> No recopilamos
+            información personal identificable.
             </p>
           </div>
         </div>

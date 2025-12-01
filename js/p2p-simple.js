@@ -42,24 +42,42 @@ const P2PSimple = {
         try {
             // 1. Obtener datos locales
             const myData = await IndexedDBStorage.loadData(this.country);
+            const myRecords = myData.records || [];
             
-            console.log(`🔄 Sincronizando: ${myData.records?.length || 0} registros locales`);
+            console.log(`🔄 Sincronizando: ${myRecords.length} registros locales`);
             
-            // 2. Enviar al servidor (solo últimos 1000 para no saturar)
-            const recentRecords = (myData.records || [])
-                .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-                .slice(0, 1000);
+            // 2. PUSH: Enviar mis registros al servidor (en chunks pequeños)
+            if (myRecords.length > 0) {
+                const CHUNK_SIZE = 10; // Enviar de 10 en 10
+                const recentRecords = myRecords
+                    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+                    .slice(0, 100); // Solo los últimos 100
+                
+                for (let i = 0; i < recentRecords.length; i += CHUNK_SIZE) {
+                    const chunk = recentRecords.slice(i, i + CHUNK_SIZE);
+                    
+                    try {
+                        await fetch(`${API.baseURL}/api/push`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                country: this.country,
+                                records: chunk
+                            })
+                        });
+                    } catch (error) {
+                        console.warn(`⚠️ Error enviando chunk ${i / CHUNK_SIZE + 1}`);
+                    }
+                }
+            }
 
+            // 3. SYNC: Obtener datos del servidor
             const response = await fetch(`${API.baseURL}/api/sync`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     country: this.country,
-                    clientData: {
-                        records: recentRecords,
-                        threads: myData.threads || {},
-                        lastUpdate: Date.now()
-                    }
+                    recordCount: myRecords.length
                 })
             });
 
@@ -75,16 +93,16 @@ const P2PSimple = {
                 
                 console.log(`📥 Servidor: ${serverData.records?.length || 0} registros`);
                 
-                // 3. Hacer merge (sin duplicados)
+                // 4. Hacer merge (sin duplicados)
                 const merged = this.mergeData(myData, serverData);
                 
-                // 4. Guardar localmente
+                // 5. Guardar localmente
                 await IndexedDBStorage.saveData(this.country, merged);
                 
                 console.log(`✅ Total: ${merged.records.length} registros`);
                 
-                // 5. Actualizar UI si cambió algo
-                if (merged.records.length !== myData.records?.length) {
+                // 6. Actualizar UI si cambió algo
+                if (merged.records.length !== myRecords.length) {
                     this.notifyDataChanged();
                 }
             }

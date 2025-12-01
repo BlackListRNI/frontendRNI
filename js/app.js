@@ -4,6 +4,43 @@ const App = {
   currentRecordId: null,
   userId: null,
 
+  // Helper para cargar datos SIEMPRE desde IndexedDB primero
+  async loadDataSafe(country) {
+    let data = { records: [], threads: {} };
+    
+    if (typeof IndexedDBStorage !== 'undefined') {
+      try {
+        data = await IndexedDBStorage.loadData(country);
+      } catch (error) {
+        console.error('Error cargando desde IndexedDB:', error);
+        data = Utils.getLocalData(country);
+      }
+    } else {
+      data = Utils.getLocalData(country);
+    }
+    
+    // Asegurar estructura
+    if (!data.records) data.records = [];
+    if (!data.threads) data.threads = {};
+    
+    return data;
+  },
+  
+  // Helper para guardar datos SIEMPRE en ambos lugares
+  async saveDataSafe(country, data) {
+    // Guardar en IndexedDB
+    if (typeof IndexedDBStorage !== 'undefined') {
+      try {
+        await IndexedDBStorage.saveData(country, data);
+      } catch (error) {
+        console.error('Error guardando en IndexedDB:', error);
+      }
+    }
+    
+    // Guardar en localStorage (backup)
+    Utils.saveLocalData(country, data);
+  },
+
   async init() {
     this.userId = Utils.getUserId();
     
@@ -54,6 +91,11 @@ const App = {
     this.syncWithServer().catch(error => {
       console.log('Sync en background falló:', error);
     });
+    
+    // Inicializar sincronización entre pestañas
+    if (typeof TabSync !== 'undefined') {
+      TabSync.init(this.currentCountry);
+    }
     
     // Inicializar P2P Mesh en background
     if (typeof P2PMesh !== 'undefined') {
@@ -409,7 +451,11 @@ const App = {
         record.editableFields = [];
       }
       
-      const data = Utils.getLocalData(this.currentCountry);
+      // CRÍTICO: Cargar datos de forma segura
+      const data = await this.loadDataSafe(this.currentCountry);
+      
+      console.log(`📊 Antes de agregar: ${data.records.length} registros`);
+      
       data.records.push(record);
       data.threads[record.id] = { 
         comments: [], 
@@ -417,12 +463,27 @@ const App = {
         fieldProposals: {}
       };
       data.lastUpdate = Date.now();
-      Utils.saveLocalData(this.currentCountry, data);
       
-      UI.renderTable(data.records);
+      console.log(`📊 Después de agregar: ${data.records.length} registros`);
+      
+      // Guardar de forma segura
+      await this.saveDataSafe(this.currentCountry, data);
+      
+      // Actualizar UI
+      if (typeof Filters !== 'undefined') {
+        Filters.setRecords(data.records);
+      } else {
+        UI.renderTable(data.records);
+      }
+      
       UI.closeModal();
       UI.showToast('✅ Infiel publicado exitosamente', 'success');
       this.syncWithServer();
+      
+      // Notificar a otras pestañas
+      if (typeof TabSync !== 'undefined') {
+        TabSync.notifyNewRecord(record, this.currentCountry);
+      }
       
       // Broadcast a red P2P
       if (typeof P2PMesh !== 'undefined' && P2PMesh.isInitialized) {
@@ -664,13 +725,39 @@ const App = {
         this.userId
       );
 
-      const data = Utils.getLocalData(this.currentCountry);
+      // Cargar datos correctamente (IndexedDB o localStorage)
+      let data = { records: [], threads: {} };
+      if (typeof IndexedDBStorage !== 'undefined') {
+        try {
+          data = await IndexedDBStorage.loadData(this.currentCountry);
+        } catch (error) {
+          data = Utils.getLocalData(this.currentCountry);
+        }
+      } else {
+        data = Utils.getLocalData(this.currentCountry);
+      }
+      
+      // Asegurar que threads existe
+      if (!data.threads) {
+        data.threads = {};
+      }
+      
       data.threads[this.currentRecordId] = result.thread;
       data.lastUpdate = Date.now();
+      
+      // Guardar en ambos lugares
+      if (typeof IndexedDBStorage !== 'undefined') {
+        await IndexedDBStorage.saveData(this.currentCountry, data);
+      }
       Utils.saveLocalData(this.currentCountry, data);
       
       // Registrar que el usuario comentó (rate limiting)
       CommentRateLimit.recordComment(this.currentRecordId, this.userId);
+      
+      // Notificar a otras pestañas
+      if (typeof TabSync !== 'undefined') {
+        TabSync.notifyNewComment(this.currentRecordId, result.thread, this.currentCountry);
+      }
       
       // Renderizar solo 5 comentarios más recientes
       UI.renderComments(result.thread.comments, 5);
@@ -725,13 +812,41 @@ const App = {
         this.userId
       );
 
-      const data = Utils.getLocalData(this.currentCountry);
+      // Cargar datos correctamente
+      let data = { records: [], threads: {} };
+      if (typeof IndexedDBStorage !== 'undefined') {
+        try {
+          data = await IndexedDBStorage.loadData(this.currentCountry);
+        } catch (error) {
+          data = Utils.getLocalData(this.currentCountry);
+        }
+      } else {
+        data = Utils.getLocalData(this.currentCountry);
+      }
+      
+      if (!data.threads) {
+        data.threads = {};
+      }
+      if (!data.threads[this.currentRecordId]) {
+        data.threads[this.currentRecordId] = { comments: [], votes: { approve: 0, reject: 0 } };
+      }
+      
       data.threads[this.currentRecordId].votes = result.votes;
       data.lastUpdate = Date.now();
+      
+      // Guardar en ambos lugares
+      if (typeof IndexedDBStorage !== 'undefined') {
+        await IndexedDBStorage.saveData(this.currentCountry, data);
+      }
       Utils.saveLocalData(this.currentCountry, data);
       
       // Guardar que el usuario ya votó
       localStorage.setItem(voteKey, voteType);
+      
+      // Notificar a otras pestañas
+      if (typeof TabSync !== 'undefined') {
+        TabSync.notifyNewVote(this.currentRecordId, result.votes, this.currentCountry);
+      }
       
       document.getElementById('approve-count').textContent = result.votes.approve;
       document.getElementById('reject-count').textContent = result.votes.reject;
@@ -757,32 +872,29 @@ const App = {
   },
 
   async syncWithServer() {
-    // CARGAR DATOS LOCALES (puede ser de IndexedDB o localStorage)
-    let localData = Utils.getLocalData(this.currentCountry);
-    
-    // Si localStorage está vacío, cargar desde IndexedDB
-    if ((!localData.records || localData.records.length === 0) && typeof IndexedDBStorage !== 'undefined') {
-      const idbData = await IndexedDBStorage.loadData(this.currentCountry);
-      if (idbData && idbData.records) {
-        localData = idbData;
-      }
-    }
+    // Cargar datos de forma segura
+    const localData = await this.loadDataSafe(this.currentCountry);
+    console.log(`📊 Datos locales: ${localData.records.length} registros`);
 
     try {
-      // 1. SINCRONIZAR CON SERVIDOR (una sola vez)
+      console.log(`🔄 Sincronizando con servidor (enviando ${localData.records.length} registros)...`);
+      
+      // 1. SINCRONIZAR CON SERVIDOR
       const result = await API.sync(
         this.currentCountry,
         localData,
         localData.lastUpdate
       );
 
-      // 2. CLIENTE HACE TODO EL TRABAJO PESADO:
+      console.log(`📥 Servidor respondió con ${result.data?.records?.length || 0} registros`);
+
+      // 2. MERGE INTELIGENTE (nunca perder datos)
       let mergedData = this.mergeData(localData, result.data);
       mergedData = Deduplicator.cleanCountryData(mergedData);
       mergedData.lastUpdate = Date.now();
       
       const totalRecords = mergedData.records.length;
-      console.log(`📊 Total después de merge: ${totalRecords} registros`);
+      console.log(`✅ Total después de merge: ${totalRecords} registros`);
       
       // 3. SISTEMA HÍBRIDO CON CHUNKS REPLICADOS
       if (typeof IndexedDBStorage !== 'undefined' && typeof DistributedStorage !== 'undefined') {

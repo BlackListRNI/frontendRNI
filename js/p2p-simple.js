@@ -105,52 +105,40 @@ const P2PSimple = {
 
     async uploadMyData() {
         try {
-            let sent = 0;
-            let skipped = 0;
+            // Obtener índice del último registro enviado
+            const lastUploaded = parseInt(localStorage.getItem(`lastUploaded_${this.country}`) || '0');
             
-            // Enviar registros en lotes de 5 (más lento para evitar rate limit)
-            for (let i = 0; i < this.myData.records.length; i += 5) {
-                const batch = this.myData.records.slice(i, i + 5);
+            // Solo enviar 1 registro por sincronización
+            if (lastUploaded < this.myData.records.length) {
+                const record = this.myData.records[lastUploaded];
                 
-                for (const record of batch) {
-                    try {
-                        const response = await fetch(`${API.baseURL}/api/submit`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                country: this.country,
-                                record: record
-                            })
-                        });
-                        
-                        if (response.ok) {
-                            sent++;
-                        } else if (response.status === 429) {
-                            // Rate limit, esperar 1 segundo
-                            console.log('⏳ Rate limit, esperando...');
-                            await new Promise(resolve => setTimeout(resolve, 1000));
-                            i -= 5; // Reintentar este lote
-                            break;
-                        } else if (response.status === 409) {
-                            // Duplicado, ignorar
-                            skipped++;
-                        } else {
-                            skipped++;
-                        }
-                    } catch (error) {
-                        skipped++;
+                try {
+                    const response = await fetch(`${API.baseURL}/api/submit`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            country: this.country,
+                            record: record
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        localStorage.setItem(`lastUploaded_${this.country}`, (lastUploaded + 1).toString());
+                        console.log(`📤 ${lastUploaded + 1}/${this.myData.records.length} registros enviados`);
+                    } else if (response.status === 429) {
+                        console.log('⏳ Rate limit alcanzado, reintentando en próxima sync');
+                    } else if (response.status === 409) {
+                        // Duplicado, saltar al siguiente
+                        localStorage.setItem(`lastUploaded_${this.country}`, (lastUploaded + 1).toString());
                     }
+                } catch (error) {
+                    console.error('Error enviando registro:', error);
                 }
-                
-                console.log(`📤 ${sent}/${this.myData.records.length} enviados, ${skipped} omitidos`);
-                
-                // Pequeña pausa entre lotes
-                await new Promise(resolve => setTimeout(resolve, 200));
+            } else {
+                console.log(`✅ Todos los registros ya fueron enviados`);
             }
-            
-            console.log(`✅ Sincronización completa: ${sent} enviados, ${skipped} omitidos`);
         } catch (error) {
-            console.error('Error enviando datos:', error);
+            console.error('Error en uploadMyData:', error);
         }
     },
 

@@ -26,13 +26,9 @@ const P2PSimple = {
         // Sincronizar con servidor inmediatamente
         await this.syncWithServer();
 
-        // Anunciar presencia
-        await this.announce();
-
         // Sincronizar cada 2 minutos
         this.syncInterval = setInterval(() => {
             this.syncWithServer();
-            this.announce();
         }, 2 * 60 * 1000);
 
         this.isInitialized = true;
@@ -68,74 +64,6 @@ const P2PSimple = {
         } catch (error) {
             console.error('Error cargando datos:', error);
             this.myData = { records: [], threads: {} };
-        }
-    },
-
-    async announce() {
-        try {
-            const recordCount = this.myData?.records?.length || 0;
-
-            const response = await fetch(`${API.baseURL}/api/announce`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    country: this.country,
-                    peerId: this.myPeerId,
-                    recordCount: recordCount
-                })
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-
-                // Solo log si hay cambios significativos
-                if (result.totalRecords > recordCount + 10) {
-                    console.log(`📢 Red: ${result.totalPeers} peers, ${result.totalRecords} registros disponibles`);
-                    await this.requestDataFromPeers();
-                }
-            }
-        } catch (error) {
-            // Silencioso
-        }
-    },
-
-    async requestDataFromPeers() {
-        try {
-            const response = await fetch(`${API.baseURL}/api/data/request`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    country: this.country
-                })
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-
-                if (result.peers && result.peers.length > 0) {
-                    console.log(`✅ ${result.peers.length} peers con datos`);
-                }
-            }
-        } catch (error) {
-            // Silencioso
-        }
-    },
-
-    async shareMyData() {
-        if (!this.myData || this.myData.records.length === 0) return;
-
-        try {
-            await fetch(`${API.baseURL}/api/data/share`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    country: this.country,
-                    peerId: this.myPeerId,
-                    sharedData: this.myData
-                })
-            });
-        } catch (error) {
-            console.error('Error compartiendo datos:', error);
         }
     },
 
@@ -210,7 +138,6 @@ const P2PSimple = {
     async forceSync() {
         await this.loadMyData();
         await this.syncWithServer();
-        await this.announce();
     },
 
     disconnect() {

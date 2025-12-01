@@ -141,40 +141,69 @@ const P2PSimple = {
 
     async syncWithServer() {
         try {
-            console.log('🔄 Sincronizando con servidor...');
+            const lastSync = localStorage.getItem(`lastSync_${this.country}`) || 0;
 
             const response = await fetch(`${API.baseURL}/api/sync`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    country: this.country,
-                    clientData: this.myData
+                    since: parseInt(lastSync)
                 })
             });
 
             if (response.ok) {
                 const result = await response.json();
 
-                if (result.data && result.data.records) {
-                    // Actualizar datos locales con datos del servidor
-                    this.myData = result.data;
-
-                    // Guardar en IndexedDB
-                    await IndexedDBStorage.saveData(this.country, this.myData);
-
-                    // Guardar en localStorage (backup)
-                    await Utils.saveLocalData(this.country, this.myData);
-
-                    // Actualizar UI
-                    if (typeof Filters !== 'undefined') {
-                        Filters.setRecords(this.myData.records);
-                    }
-
-                    console.log(`✅ ${this.myData.records.length} registros sincronizados`);
+                if (result.events && result.events.length > 0) {
+                    await this.applyEvents(result.events);
+                    localStorage.setItem(`lastSync_${this.country}`, result.serverTime);
+                    console.log(`✅ ${result.events.length} eventos aplicados`);
                 }
             }
         } catch (error) {
             console.error('Error sincronizando:', error);
+        }
+    },
+
+    async applyEvents(events) {
+        for (const event of events) {
+            if (event.country !== this.country) continue;
+
+            switch (event.type) {
+                case 'record_created':
+                    if (!this.myData.records.find(r => r.id === event.recordId)) {
+                        this.myData.records.push(event.record);
+                        if (!this.myData.threads[event.recordId]) {
+                            this.myData.threads[event.recordId] = { comments: [], votes: { approve: 0, reject: 0 } };
+                        }
+                    }
+                    break;
+
+                case 'comment_added':
+                    if (!this.myData.threads[event.recordId]) {
+                        this.myData.threads[event.recordId] = { comments: [], votes: { approve: 0, reject: 0 } };
+                    }
+                    this.myData.threads[event.recordId].comments.push(event.comment);
+                    break;
+
+                case 'vote_added':
+                    if (!this.myData.threads[event.recordId]) {
+                        this.myData.threads[event.recordId] = { comments: [], votes: { approve: 0, reject: 0 } };
+                    }
+                    if (event.voteType === 'approve') {
+                        this.myData.threads[event.recordId].votes.approve++;
+                    } else {
+                        this.myData.threads[event.recordId].votes.reject++;
+                    }
+                    break;
+            }
+        }
+
+        await IndexedDBStorage.saveData(this.country, this.myData);
+        await Utils.saveLocalData(this.country, this.myData);
+
+        if (typeof Filters !== 'undefined') {
+            Filters.setRecords(this.myData.records);
         }
     },
 

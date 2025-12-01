@@ -26,6 +26,12 @@ const AdsConfig = {
       image: '/assets/ads1-compota.jpg',
       link: 'https://wa.me/c/51957750290',
       position: 'left'
+    },
+    {
+      id: 'anuncio-2',
+      image: '/assets/ad3.jpg',
+      link: 'https://www.instagram.com/brujula.de.datos?igsh=MWIyOGM3YmtiN3g5cg%3D%3D',
+      position: 'right'
     }
     // Agrega más anuncios aquí siguiendo el mismo formato
   ]

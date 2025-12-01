@@ -87,10 +87,8 @@ const App = {
     // Ocultar loading screen SIEMPRE
     this.hideLoadingScreen();
     
-    // Sincronizar con servidor en BACKGROUND (no bloquear)
-    this.syncWithServer().catch(error => {
-      console.log('Sync en background falló:', error);
-    });
+    // P2P Simple maneja la sincronización automáticamente
+    console.log('💾 P2P Simple: Sincronización automática cada 60 seg');
     
     // Inicializar sincronización entre pestañas
     if (typeof TabSync !== 'undefined') {

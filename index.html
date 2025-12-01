@@ -45,6 +45,7 @@
   <link rel="stylesheet" href="/css/image-uploader.css">
   <link rel="stylesheet" href="/css/filters.css">
   <link rel="stylesheet" href="/css/ads.css?v=3">
+  <link rel="stylesheet" href="/css/migration-popup.css">
 
   <!-- Structured Data (JSON-LD) -->
   <script type="application/ld+json">
@@ -72,6 +73,75 @@
 </head>
 
 <body>
+  <!-- Popup de Migración -->
+  <div id="migration-overlay" class="migration-overlay">
+    <div class="migration-popup">
+      <div class="migration-header">
+        <button class="migration-close" onclick="closeMigrationPopup()">&times;</button>
+        <h2>Nos Estamos Mudando</h2>
+        <p>Mejorando tu experiencia en RNI</p>
+      </div>
+
+      <div class="migration-body">
+        <div class="migration-section">
+          <h3>Importante: Cambios en el Servicio</h3>
+          <p>
+            Debido a múltiples intentos de saturación y ataques al servidor, hemos preparado
+            una nueva versión más robusta y rápida de RNI.
+          </p>
+          <p>
+            Puedes seguir usando esta versión sin problemas, pero te recomendamos migrar
+            al nuevo servidor para una mejor experiencia.
+          </p>
+        </div>
+
+        <div class="migration-advantages">
+          <h4>Ventajas del Nuevo Servidor</h4>
+          <ul class="advantage-list">
+            <li>Mucho más rápido en carga y respuesta</li>
+            <li>Más registros disponibles y actualizados</li>
+            <li>Sincronización más frecuente de datos</li>
+            <li>Mayor protección contra ataques</li>
+            <li>Mejor rendimiento en dispositivos móviles</li>
+          </ul>
+        </div>
+
+        <div class="migration-warning">
+          <h4>Tu navegador dirá "No es seguro"</h4>
+          <p>
+            El nuevo servidor no tiene certificado HTTPS, por lo que tu navegador mostrará
+            una advertencia de seguridad. Simplemente haz click en "Continuar al sitio"
+            o "Avanzado" y luego "Continuar".
+          </p>
+        </div>
+
+        <div class="migration-security">
+          <h4>Pero es completamente seguro porque:</h4>
+          <ul class="security-list">
+            <li>No hay sistema de cuentas ni login</li>
+            <li>No pedimos ni almacenamos datos personales</li>
+            <li>Todo el contenido es anónimo y público</li>
+            <li>No procesamos pagos ni información sensible</li>
+          </ul>
+        </div>
+
+        <div class="migration-actions">
+          <a href="http://coquettecraft.duckdns.org:3050/" class="migration-btn migration-btn-primary" target="_blank"
+            rel="noopener noreferrer">
+            Ir al Nuevo Servidor
+          </a>
+          <button class="migration-btn migration-btn-secondary" onclick="closeMigrationPopup()">
+            Quedarme Aquí
+          </button>
+        </div>
+
+        <div class="migration-note">
+          Si prefieres quedarte en esta versión, está bien. Ambas funcionan correctamente.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Loading Screen -->
   <div id="loading-overlay" class="loading-overlay">
     <div class="loading-content">
@@ -857,6 +927,54 @@
   <!-- Sistema de publicidad -->
   <script src="/js/ads-config.js?v=3"></script>
   <script src="/js/ads.js?v=3"></script>
+
+  <!-- Script del popup de migración -->
+  <script>
+    // Mostrar popup de migración al cargar la página
+    function showMigrationPopup() {
+      const overlay = document.getElementById('migration-overlay');
+      if (overlay) {
+        // Verificar si el usuario ya cerró el popup en esta sesión
+        const popupClosed = sessionStorage.getItem('migration-popup-closed');
+        if (!popupClosed) {
+          overlay.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        }
+      }
+    }
+
+    function closeMigrationPopup() {
+      const overlay = document.getElementById('migration-overlay');
+      if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          document.body.style.overflow = '';
+        }, 300);
+        // Guardar en sessionStorage para no mostrar de nuevo en esta sesión
+        sessionStorage.setItem('migration-popup-closed', 'true');
+      }
+    }
+
+    // Mostrar popup después de que cargue el contenido
+    window.addEventListener('load', () => {
+      setTimeout(showMigrationPopup, 500);
+    });
+
+    // Cerrar con tecla ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMigrationPopup();
+      }
+    });
+
+    // Cerrar al hacer click fuera del popup
+    document.getElementById('migration-overlay')?.addEventListener('click', (e) => {
+      if (e.target.id === 'migration-overlay') {
+        closeMigrationPopup();
+      }
+    });
+  </script>
 </body>
 
 </html>

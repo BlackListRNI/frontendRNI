@@ -1,8 +1,6 @@
 // ============================================
-// P2P SIMPLE - INDEXEDDB + SYNC LIGERO
+// SYNC SIMPLE CON SERVIDOR COMPRIMIDO
 // ============================================
-// Sincroniza con servidor cada 60 segundos
-// Servidor solo guarda últimos 1000 registros por país
 
 const P2PSimple = {
     country: null,
@@ -17,8 +15,7 @@ const P2PSimple = {
         this.country = country;
         this.myPeerId = `peer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
-        console.log(`🌐 P2P Simple iniciado para ${country}`);
-        console.log(`💾 IndexedDB + Sync cada 60 seg`);
+        console.log(`🌐 Sync iniciado para ${country}`);
         
         // Primera sincronización inmediata
         await this.syncWithServer();
@@ -33,7 +30,6 @@ const P2PSimple = {
 
     async syncWithServer() {
         if (this.isSyncing) {
-            console.log('⏭️ Sync en progreso, saltando...');
             return;
         }
 
@@ -44,37 +40,18 @@ const P2PSimple = {
             const myData = await IndexedDBStorage.loadData(this.country);
             const myRecords = myData.records || [];
             
-            console.log(`🔄 Sincronizando: ${myRecords.length} registros locales`);
+            console.log(`🔄 Enviando ${myRecords.length} registros al servidor`);
             
-            // 2. PUSH: Enviar solo IDs al servidor (ultra ligero)
-            if (myRecords.length > 0) {
-                const myRecordIds = myRecords.map(r => r.id);
-                
-                try {
-                    await fetch(`${API.baseURL}/api/push`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            country: this.country,
-                            recordIds: myRecordIds
-                        })
-                    });
-                } catch (error) {
-                    console.warn('⚠️ Error enviando IDs');
-                }
-            }
-
-            // 3. SYNC: Registrarse y obtener metadata
-            const myRecordIds = myRecords.map(r => r.id);
-            
+            // 2. Enviar al servidor y recibir merge
             const response = await fetch(`${API.baseURL}/api/sync`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     country: this.country,
-                    peerId: this.myPeerId,
-                    recordCount: myRecords.length,
-                    recordIds: myRecordIds.slice(0, 100) // Solo primeros 100 IDs
+                    clientData: {
+                        records: myRecords,
+                        threads: myData.threads || {}
+                    }
                 })
             });
 
@@ -85,14 +62,23 @@ const P2PSimple = {
 
             const result = await response.json();
             
-            if (result.success && result.metadata) {
-                const { totalPeers, totalRecordsInNetwork } = result.metadata;
+            if (result.success && result.data) {
+                const serverData = result.data;
                 
-                console.log(`📊 Red: ${totalPeers} peers, ~${totalRecordsInNetwork} registros totales`);
-                console.log(`💾 Local: ${myRecords.length} registros`);
+                console.log(`📥 Servidor tiene ${serverData.records?.length || 0} registros`);
                 
-                // 4. Actualizar UI
-                this.notifyDataChanged();
+                // 3. Hacer merge local
+                const merged = this.mergeData(myData, serverData);
+                
+                // 4. Guardar localmente
+                await IndexedDBStorage.saveData(this.country, merged);
+                
+                console.log(`✅ Total local: ${merged.records.length} registros`);
+                
+                // 5. Actualizar UI si cambió
+                if (merged.records.length !== myRecords.length) {
+                    this.notifyDataChanged();
+                }
             }
         } catch (error) {
             console.error('❌ Error en sync:', error.message);
@@ -102,15 +88,14 @@ const P2PSimple = {
     },
 
     mergeData(local, remote) {
-        // Merge records (sin duplicados por ID)
         const recordsMap = new Map();
         
-        // Agregar locales primero
+        // Agregar locales
         if (local.records) {
             local.records.forEach(r => recordsMap.set(r.id, r));
         }
         
-        // Agregar remotos (sobrescribe si es más reciente)
+        // Agregar remotos (más recientes ganan)
         if (remote.records) {
             remote.records.forEach(r => {
                 const existing = recordsMap.get(r.id);
@@ -120,29 +105,23 @@ const P2PSimple = {
             });
         }
         
-        // Merge threads
-        const threads = { ...local.threads, ...remote.threads };
-        
         return {
             records: Array.from(recordsMap.values()),
-            threads,
+            threads: { ...local.threads, ...remote.threads },
             lastUpdate: Date.now()
         };
     },
 
     notifyDataChanged() {
-        // Recargar lista si estamos en la página principal
         if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
             if (typeof window.loadRecords === 'function') {
-                console.log('🔄 Recargando lista...');
                 window.loadRecords();
             }
         }
     },
 
     async forceSync() {
-        console.log('🔄 Forzando sincronización...');
-        this.isSyncing = false; // Reset flag
+        this.isSyncing = false;
         await this.syncWithServer();
     },
 
@@ -151,18 +130,15 @@ const P2PSimple = {
             clearInterval(this.syncInterval);
         }
         this.isInitialized = false;
-        console.log('🔌 P2P Simple desconectado');
     },
 
     getStats() {
         return {
             peerId: this.myPeerId,
             country: this.country,
-            isInitialized: this.isInitialized,
-            isSyncing: this.isSyncing
+            isInitialized: this.isInitialized
         };
     }
 };
 
-// Exportar globalmente
 window.P2PSimple = P2PSimple;

@@ -186,7 +186,7 @@ const UI = {
       return `
         <tr ${isDuplicate ? 'class="duplicate-row" title="⚠️ Posible duplicado detectado"' : ''}>
           <td>${photoHtml}</td>
-          <td class="clickable-name" onclick="App.openThread('${record.id}')" style="cursor: pointer; color: #d81b60; font-weight: 600;">
+          <td class="clickable-name" onclick="(async () => await App.openThread('${record.id}'))()" style="cursor: pointer; color: #d81b60; font-weight: 600;">
             ${isDuplicate ? '<span style="color: #ff9800; margin-right: 4px;" title="Duplicado">⚠️</span>' : ''}
             ${Utils.escapeHtml(record.nombres)}
           </td>

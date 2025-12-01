@@ -452,14 +452,50 @@ const App = {
     }
   },
 
-  openThread(recordId) {
+  async openThread(recordId) {
     this.currentRecordId = recordId;
-    const data = Utils.getLocalData(this.currentCountry);
-    const record = data.records.find(r => r.id === recordId);
+    
+    // Cargar datos desde IndexedDB primero
+    let data = { records: [], threads: {} };
+    
+    if (typeof IndexedDBStorage !== 'undefined') {
+      try {
+        data = await IndexedDBStorage.loadData(this.currentCountry);
+      } catch (error) {
+        console.error('Error cargando desde IndexedDB:', error);
+        data = Utils.getLocalData(this.currentCountry);
+      }
+    } else {
+      data = Utils.getLocalData(this.currentCountry);
+    }
+    
+    let record = data.records.find(r => r.id === recordId);
+    
+    // Si no está en IndexedDB, intentar sincronizar
+    if (!record) {
+      UI.showToast('🔄 Buscando registro...', 'info');
+      
+      try {
+        // Sincronizar con servidor
+        const result = await API.sync(this.currentCountry, data);
+        if (result && result.records) {
+          if (typeof IndexedDBStorage !== 'undefined') {
+            await IndexedDBStorage.saveData(this.currentCountry, result);
+          } else {
+            Utils.saveLocalData(this.currentCountry, result);
+          }
+          data = result;
+          record = data.records.find(r => r.id === recordId);
+        }
+      } catch (error) {
+        console.error('Error sincronizando:', error);
+      }
+    }
+    
     const thread = data.threads[recordId] || { comments: [], votes: { approve: 0, reject: 0 } };
 
     if (!record) {
-      UI.showToast('Registro no encontrado', 'error');
+      UI.showToast('Registro no encontrado. Intenta sincronizar.', 'error');
       return;
     }
 

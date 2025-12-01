@@ -70,11 +70,13 @@ const P2PSimple = {
     async syncWithServer() {
         try {
             const lastSync = localStorage.getItem(`lastSync_${this.country}`) || 0;
+            const hasUploaded = localStorage.getItem(`uploaded_${this.country}`);
 
             // Si es la primera sincronización y tengo datos, enviarlos
-            if (lastSync == 0 && this.myData.records.length > 0) {
+            if (!hasUploaded && this.myData.records.length > 0) {
                 console.log(`📤 Primera sync: enviando ${this.myData.records.length} registros`);
                 await this.uploadMyData();
+                localStorage.setItem(`uploaded_${this.country}`, 'true');
             }
 
             const response = await fetch(`${API.baseURL}/api/sync`, {
@@ -90,9 +92,11 @@ const P2PSimple = {
 
                 if (result.events && result.events.length > 0) {
                     await this.applyEvents(result.events);
-                    localStorage.setItem(`lastSync_${this.country}`, result.serverTime);
                     console.log(`✅ ${result.events.length} eventos aplicados`);
                 }
+                
+                // Siempre actualizar el timestamp, incluso si no hay eventos
+                localStorage.setItem(`lastSync_${this.country}`, result.serverTime);
             }
         } catch (error) {
             console.error('Error sincronizando:', error);

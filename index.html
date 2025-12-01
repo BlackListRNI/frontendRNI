@@ -560,9 +560,6 @@
                 <button type="button" class="tab-btn" id="tab-upload" onclick="switchPhotoTab('upload')">
                   📤 Subir desde PC
                 </button>
-                <button type="button" class="tab-btn" id="tab-tutorial" onclick="switchPhotoTab('tutorial')">
-                  📚 Tutorial
-                </button>
               </div>
 
               <!-- Contenedor para URL manual (PRINCIPAL) -->
@@ -572,116 +569,11 @@
                 <small class="form-hint" style="display: block; margin-top: 8px;">
                   ⚡ <strong>Ventaja:</strong> Con un enlace directo, tu imagen se verá más rápido y nunca se perderá.
                 </small>
-                <small class="form-hint" style="display: block; margin-top: 5px; color: #27ae60;">
-                  💡 <strong>¿No sabes cómo?</strong> Haz click en la pestaña "📚 Tutorial" para ver el paso a paso.
-                </small>
               </div>
 
               <!-- Contenedor para subir imagen (SECUNDARIO) -->
               <div id="photo-upload-container" style="display: none;">
-                <div class="info-box"
-                  style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border: 2px solid #2196f3; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                  <div style="display: flex; align-items: start; gap: 10px;">
-                    <span style="font-size: 1.5rem;">💡</span>
-                    <div>
-                      <strong style="color: #1565c0; display: block; margin-bottom: 5px;">¿Sabías que con un enlace
-                        directo tu imagen se verá más rápido?</strong>
-                      <p style="margin: 0; color: #1976d2; font-size: 0.9rem; line-height: 1.5;">
-                        Además, nunca se perderá y podrás compartirla fácilmente.
-                        <strong>Haz click en "📚 Tutorial"</strong> para aprender cómo subir a Imgur o ImgBB en 4 pasos
-                        simples.
-                      </p>
-                    </div>
-                  </div>
-                </div>
                 <div id="image-uploader-area"></div>
-              </div>
-
-              <!-- Tutorial paso a paso -->
-              <div id="photo-tutorial-container" style="display: none;">
-                <div class="tutorial-box">
-                  <h4 style="margin: 0 0 10px 0; color: var(--elegant-black); font-size: 1.2rem;">📚 Tutorial: Sube tu
-                    imagen en 4 pasos</h4>
-                  <p style="margin: 0 0 20px 0; color: #666; font-size: 0.95rem;">Es muy fácil y tu imagen se verá más
-                    rápido 🚀</p>
-
-                  <div class="tutorial-step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                      <strong>Abre Imgur o ImgBB</strong>
-                      <p>
-                        <a href="https://imgur.com/upload" target="_blank" class="tutorial-link">
-                          🔗 Abrir Imgur
-                        </a>
-                        <span style="margin: 0 8px; color: #ccc;">o</span>
-                        <a href="https://imgbb.com/" target="_blank" class="tutorial-link">
-                          🔗 Abrir ImgBB
-                        </a>
-                      </p>
-                      <small style="color: #999;">Ambos son gratis y no requieren registro</small>
-                      <div style="margin-top: 15px; text-align: center;">
-                        <img src="/assets/1.jpeg" alt="Paso 1: Abrir Imgur"
-                          onclick="window.open('/assets/1.jpeg', '_blank')" title="Click para ver en tamaño completo">
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="tutorial-step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                      <strong>Sube tu foto</strong>
-                      <p>Arrastra la imagen o haz click en "Browse" / "Examinar"</p>
-                      <small style="color: #999;">Espera unos segundos mientras se sube</small>
-                      <div style="margin-top: 15px; text-align: center;">
-                        <img src="/assets/2.jpeg" alt="Paso 2: Subir imagen"
-                          onclick="window.open('/assets/2.jpeg', '_blank')" title="Click para ver en tamaño completo">
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="tutorial-step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                      <strong>Copia el enlace directo</strong>
-                      <p>Busca el botón que dice <strong>"Direct Link"</strong> o <strong>"BBCode (Direct)"</strong></p>
-                      <small style="color: #999;">
-                        💡 Tip: El enlace debe terminar en .jpg, .png o .gif<br>
-                        Ejemplo: https://i.imgur.com/abc123.jpg
-                      </small>
-                      <div style="margin-top: 15px; text-align: center;">
-                        <img src="/assets/3.jpeg" alt="Paso 3: Copiar enlace directo"
-                          onclick="window.open('/assets/3.jpeg', '_blank')" title="Click para ver en tamaño completo">
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="tutorial-step">
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                      <strong>¡Listo! Pega el enlace</strong>
-                      <p>Vuelve a la pestaña <strong>"🔗 Pegar URL"</strong> y pega el enlace que copiaste</p>
-                      <small style="color: #27ae60;">✅ Tu imagen se verá perfecta y nunca se perderá</small>
-                    </div>
-                  </div>
-
-                  <div
-                    style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, rgba(39, 174, 96, 0.1), rgba(39, 174, 96, 0.05)); border-radius: 10px; border: 2px solid #27ae60;">
-                    <strong style="color: #27ae60; font-size: 1.05rem;">🎉 ¿Por qué usar este método?</strong>
-                    <ul style="margin: 10px 0 0 20px; color: #555; line-height: 1.8;">
-                      <li><strong>⚡ Carga más rápido:</strong> Las imágenes se muestran al instante</li>
-                      <li><strong>💾 No se pierden:</strong> Quedan guardadas en Imgur/ImgBB para siempre</li>
-                      <li><strong>📱 Fácil de compartir:</strong> Puedes usar el mismo enlace en otros lugares</li>
-                      <li><strong>🚀 Sin límites:</strong> Sube imágenes de cualquier tamaño</li>
-                    </ul>
-                  </div>
-
-                  <div style="margin-top: 15px; text-align: center;">
-                    <button type="button" class="btn-primary" onclick="switchPhotoTab('url')"
-                      style="padding: 12px 30px;">
-                      ✨ Entendido, voy a pegar mi URL
-                    </button>
-                  </div>
-                </div>
               </div>
 
               <!-- Input oculto que guardará la URL final -->
@@ -862,28 +754,21 @@
     function switchPhotoTab(tab) {
       const uploadContainer = document.getElementById('photo-upload-container');
       const urlContainer = document.getElementById('photo-url-container');
-      const tutorialContainer = document.getElementById('photo-tutorial-container');
       const tabUpload = document.getElementById('tab-upload');
       const tabUrl = document.getElementById('tab-url');
-      const tabTutorial = document.getElementById('tab-tutorial');
       const fotoUrlInput = document.getElementById('foto-url-input');
 
       // Ocultar todos
       uploadContainer.style.display = 'none';
       urlContainer.style.display = 'none';
-      tutorialContainer.style.display = 'none';
       tabUpload.classList.remove('active');
       tabUrl.classList.remove('active');
-      tabTutorial.classList.remove('active');
 
       // Mostrar el seleccionado
       if (tab === 'upload') {
         uploadContainer.style.display = 'block';
         tabUpload.classList.add('active');
         fotoUrlInput.value = '';
-      } else if (tab === 'tutorial') {
-        tutorialContainer.style.display = 'block';
-        tabTutorial.classList.add('active');
       } else {
         // URL (por defecto)
         urlContainer.style.display = 'block';

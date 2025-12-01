@@ -1,5 +1,5 @@
 // ============================================
-// SOLO ANUNCIO - DATOS EN INDEXEDDB
+// P2P CON CHUNKS DISTRIBUIDOS
 // ============================================
 
 const P2PSimple = {
@@ -10,50 +10,78 @@ const P2PSimple = {
 
     async init(country) {
         if (this.isInitialized) return;
-        
+
         this.country = country;
-        this.myPeerId = `peer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        console.log(`📢 Anunciando presencia para ${country}`);
-        
-        // Anunciar cada 60 segundos
-        this.announce();
+        this.myPeerId = `peer_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+        console.log(`📢 Iniciando P2P con chunks para ${country}`);
+
+        // Inicializar IndexedDB
+        await IndexedDBStorage.init();
+
+        // Inicializar ChunkManager
+        await ChunkManager.init(country);
+
+        // Sincronizar inmediatamente al iniciar
+        await this.syncChunks();
+
+        // Sincronizar chunks cada 2 minutos
         this.syncInterval = setInterval(() => {
-            this.announce();
-        }, 60000);
-        
+            this.syncChunks();
+        }, 2 * 60 * 1000);
+
         this.isInitialized = true;
     },
 
     async announce() {
         try {
-            // Obtener cuántos registros tengo localmente
-            const myData = await IndexedDBStorage.loadData(this.country);
-            const myCount = myData.records?.length || 0;
-            
-            // Anunciar al servidor (solo números, no datos)
+            const myChunks = Array.from(ChunkManager.myChunks);
+
             const response = await fetch(`${API.baseURL}/api/announce`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     country: this.country,
                     peerId: this.myPeerId,
-                    recordCount: myCount
+                    chunks: myChunks
                 })
             });
 
             if (response.ok) {
                 const result = await response.json();
-                console.log(`📊 Red: ${result.totalPeers} peers, ${result.totalRecordsInNetwork} registros totales`);
-                console.log(`💾 Local: ${myCount} registros en IndexedDB`);
+                console.log(`📢 ${this.country}: ${result.totalPeers} peers, ${result.totalChunks} chunks`);
             }
         } catch (error) {
             console.warn('⚠️ No se pudo anunciar');
         }
     },
 
+    async syncChunks() {
+        try {
+            console.log('🔄 Sincronizando chunks...');
+            
+            // Anunciar presencia primero
+            await this.announce();
+            
+            // Sincronizar con el servidor
+            const data = await ChunkManager.sync();
+
+            // Limpiar chunks viejos
+            await ChunkManager.cleanupOldChunks();
+
+            // Actualizar UI si está disponible
+            if (typeof Filters !== 'undefined' && data.records && data.records.length > 0) {
+                Filters.setRecords(data.records);
+                console.log(`✅ ${data.records.length} registros sincronizados`);
+            }
+
+        } catch (error) {
+            console.error('Error sincronizando chunks:', error);
+        }
+    },
+
     async forceSync() {
-        await this.announce();
+        await this.syncChunks();
     },
 
     disconnect() {
@@ -67,6 +95,7 @@ const P2PSimple = {
         return {
             peerId: this.myPeerId,
             country: this.country,
+            chunks: ChunkManager.myChunks.size,
             isInitialized: this.isInitialized
         };
     }

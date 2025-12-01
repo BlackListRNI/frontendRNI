@@ -11,7 +11,43 @@ const ChunkManager = {
     async init(country) {
         this.country = country;
         await this.loadMyChunks();
+        
+        // Si no tengo chunks pero tengo datos locales, crear chunks
+        if (this.myChunks.size === 0) {
+            await this.createChunksFromLocalData();
+        }
+        
         console.log(`📦 Chunks locales: ${this.myChunks.size}`);
+    },
+    
+    async createChunksFromLocalData() {
+        try {
+            // Intentar cargar datos de localStorage o IndexedDB
+            let data = { records: [], threads: {} };
+            
+            if (typeof IndexedDBStorage !== 'undefined') {
+                try {
+                    data = await IndexedDBStorage.loadData(this.country);
+                } catch (error) {
+                    console.log('No hay datos en IndexedDB');
+                }
+            }
+            
+            if (!data.records || data.records.length === 0) {
+                data = Utils.getLocalData(this.country);
+            }
+            
+            if (data.records && data.records.length > 0) {
+                console.log(`📦 Creando chunks desde ${data.records.length} registros locales...`);
+                
+                const chunks = this.createChunks(data.records);
+                await this.saveChunksLocally(chunks);
+                
+                console.log(`✅ ${chunks.length} chunks creados desde datos locales`);
+            }
+        } catch (error) {
+            console.error('Error creando chunks desde datos locales:', error);
+        }
     },
 
     // Calcular hash de un chunk

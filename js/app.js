@@ -261,51 +261,27 @@ const App = {
     let data = { records: [], threads: {} };
     const startTime = performance.now();
     
+    // 1. Intentar cargar desde IndexedDB
     if (typeof IndexedDBStorage !== 'undefined') {
       try {
-        // Detectar modo de almacenamiento
-        const storageMode = await IndexedDBStorage.loadMetadata('storage_mode_' + this.currentCountry);
+        const idbData = await IndexedDBStorage.loadData(this.currentCountry);
         
-        if (storageMode === 'distributed') {
-          // MODO CHUNKS: Cargar índice rápido primero
-          console.log('📦 MODO CHUNKS: Cargando índice...');
-          const recordIndex = await IndexedDBStorage.loadMetadata('record_index_' + this.currentCountry);
+        if (idbData && idbData.records && idbData.records.length > 0) {
+          const loadTime = Math.round(performance.now() - startTime);
+          console.log(`✅ ${idbData.records.length} registros cargados en ${loadTime}ms`);
+          data = idbData;
           
-          if (recordIndex && recordIndex.length > 0) {
-            const loadTime = Math.round(performance.now() - startTime);
-            console.log(`⚡ ${recordIndex.length} registros (índice) cargados en ${loadTime}ms`);
-            
-            // Mostrar índice inmediatamente
-            if (typeof Filters !== 'undefined') {
-              Filters.setRecords(recordIndex);
-            }
-            
-            // Reconstruir datos completos en background
-            this.reconstructFromChunksBackground();
+          if (typeof Filters !== 'undefined') {
+            Filters.setRecords(data.records);
           }
-          
-        } else {
-          // MODO COMPLETO: Cargar todo
-          const idbData = await IndexedDBStorage.loadData(this.currentCountry);
-          
-          if (idbData && idbData.records && idbData.records.length > 0) {
-            const loadTime = Math.round(performance.now() - startTime);
-            console.log(`✅ ${idbData.records.length} registros cargados en ${loadTime}ms`);
-            data = idbData;
-            
-            if (typeof Filters !== 'undefined') {
-              Filters.setRecords(data.records);
-            }
-            return;
-          }
+          return;
         }
-        
       } catch (error) {
         console.error('Error cargando desde IndexedDB:', error);
       }
     }
     
-    // Fallback: localStorage
+    // 2. Fallback: localStorage
     console.log('📦 Fallback: Cargando desde localStorage...');
     data = Utils.getLocalData(this.currentCountry);
     
@@ -315,84 +291,17 @@ const App = {
         Filters.setRecords(data.records);
       }
     } else {
-      console.log('⚠️ No hay datos locales, esperando sincronización...');
-    }
-  },
-
-  async reconstructFromChunksBackground() {
-    try {
-      console.log('🔄 Reconstruyendo datos completos desde chunks (background)...');
-      
-      const reconstructed = await DistributedStorage.reconstructData(
-        this.currentCountry,
-        this.userId
-      );
-      
-      if (reconstructed && reconstructed.records && reconstructed.records.length > 0) {
-        console.log(`✅ ${reconstructed.records.length} registros reconstruidos`);
-        
-        // Actualizar UI con datos completos
-        if (typeof Filters !== 'undefined') {
-          Filters.setRecords(reconstructed.records);
+      console.log('⚠️ No hay datos locales, sincronizando con red...');
+      // Forzar sincronización inicial
+      setTimeout(() => {
+        if (typeof P2PSimple !== 'undefined' && P2PSimple.isInitialized) {
+          P2PSimple.forceSync();
         }
-      }
-    } catch (error) {
-      console.error('Error reconstruyendo chunks:', error);
+      }, 2000);
     }
   },
 
 
-
-  async reconstructFromChunks() {
-    try {
-      console.log('🔄 Reconstruyendo datos desde chunks distribuidos...');
-      
-      // 1. Cargar mis chunks locales
-      const myChunkIds = await IndexedDBStorage.loadMetadata('my_chunks_' + this.currentCountry);
-      const localChunks = [];
-      
-      for (const chunkId of myChunkIds || []) {
-        const chunk = await IndexedDBStorage.loadChunk(chunkId);
-        if (chunk) {
-          localChunks.push(chunk);
-        }
-      }
-      
-      console.log(`📦 Chunks locales: ${localChunks.length}`);
-      
-      // 2. Solicitar chunks faltantes al servidor
-      const reconstructed = await DistributedStorage.reconstructData(
-        this.currentCountry,
-        this.userId
-      );
-      
-      if (reconstructed && reconstructed.records) {
-        console.log(`✅ ${reconstructed.records.length} registros reconstruidos`);
-        
-        // Verificar integridad con Merkle Root
-        const expectedRoot = await IndexedDBStorage.loadMetadata('merkle_root_' + this.currentCountry);
-        const allChunks = DistributedStorage.createChunks(reconstructed.records);
-        const calculatedRoot = DistributedStorage.buildMerkleTree(allChunks);
-        
-        if (expectedRoot === calculatedRoot) {
-          console.log('✅ Integridad verificada (Merkle Root coincide)');
-        } else {
-          console.warn('⚠️ Advertencia: Merkle Root no coincide');
-        }
-        
-        return {
-          records: reconstructed.records,
-          threads: {},
-          lastUpdate: Date.now()
-        };
-      }
-      
-      return { records: [], threads: {} };
-    } catch (error) {
-      console.error('Error reconstruyendo chunks:', error);
-      return { records: [], threads: {} };
-    }
-  },
 
   async submitNewRecord(form) {
     // Deshabilitar botón y mostrar loading

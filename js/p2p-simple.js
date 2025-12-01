@@ -71,6 +71,12 @@ const P2PSimple = {
         try {
             const lastSync = localStorage.getItem(`lastSync_${this.country}`) || 0;
 
+            // Si es la primera sincronización y tengo datos, enviarlos
+            if (lastSync == 0 && this.myData.records.length > 0) {
+                console.log(`📤 Primera sync: enviando ${this.myData.records.length} registros`);
+                await this.uploadMyData();
+            }
+
             const response = await fetch(`${API.baseURL}/api/sync`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -90,6 +96,57 @@ const P2PSimple = {
             }
         } catch (error) {
             console.error('Error sincronizando:', error);
+        }
+    },
+
+    async uploadMyData() {
+        try {
+            let sent = 0;
+            let skipped = 0;
+            
+            // Enviar registros en lotes de 5 (más lento para evitar rate limit)
+            for (let i = 0; i < this.myData.records.length; i += 5) {
+                const batch = this.myData.records.slice(i, i + 5);
+                
+                for (const record of batch) {
+                    try {
+                        const response = await fetch(`${API.baseURL}/api/submit`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                country: this.country,
+                                record: record
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            sent++;
+                        } else if (response.status === 429) {
+                            // Rate limit, esperar 1 segundo
+                            console.log('⏳ Rate limit, esperando...');
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            i -= 5; // Reintentar este lote
+                            break;
+                        } else if (response.status === 409) {
+                            // Duplicado, ignorar
+                            skipped++;
+                        } else {
+                            skipped++;
+                        }
+                    } catch (error) {
+                        skipped++;
+                    }
+                }
+                
+                console.log(`📤 ${sent}/${this.myData.records.length} enviados, ${skipped} omitidos`);
+                
+                // Pequeña pausa entre lotes
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            console.log(`✅ Sincronización completa: ${sent} enviados, ${skipped} omitidos`);
+        } catch (error) {
+            console.error('Error enviando datos:', error);
         }
     },
 

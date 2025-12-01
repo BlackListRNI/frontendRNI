@@ -98,7 +98,7 @@ const DetailsPage = {
         }
         record = data.records.find(r => r.id === this.recordId);
       } catch (error) {
-        console.error('Error en P2P:', error);
+        console.log('P2P no disponible aún, usando servidor...');
       }
     }
     

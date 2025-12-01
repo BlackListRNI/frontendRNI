@@ -512,67 +512,8 @@ const App = {
   },
 
   async openThread(recordId) {
-    this.currentRecordId = recordId;
-    
-    // Cargar datos desde IndexedDB primero
-    let data = { records: [], threads: {} };
-    
-    if (typeof IndexedDBStorage !== 'undefined') {
-      try {
-        data = await IndexedDBStorage.loadData(this.currentCountry);
-      } catch (error) {
-        console.error('Error cargando desde IndexedDB:', error);
-        data = Utils.getLocalData(this.currentCountry);
-      }
-    } else {
-      data = Utils.getLocalData(this.currentCountry);
-    }
-    
-    let record = data.records.find(r => r.id === recordId);
-    
-    // Si no está en IndexedDB, intentar sincronizar
-    if (!record) {
-      UI.showToast('🔄 Buscando registro...', 'info');
-      
-      try {
-        // Sincronizar con servidor
-        const result = await API.sync(this.currentCountry, data);
-        if (result && result.records) {
-          if (typeof IndexedDBStorage !== 'undefined') {
-            await IndexedDBStorage.saveData(this.currentCountry, result);
-          } else {
-            Utils.saveLocalData(this.currentCountry, result);
-          }
-          data = result;
-          record = data.records.find(r => r.id === recordId);
-        }
-      } catch (error) {
-        console.error('Error sincronizando:', error);
-      }
-    }
-    
-    const thread = data.threads[recordId] || { comments: [], votes: { approve: 0, reject: 0 } };
-
-    if (!record) {
-      UI.showToast('Registro no encontrado. Intenta sincronizar.', 'error');
-      return;
-    }
-
-    document.getElementById('thread-title').textContent = `${record.nombres} ${record.apellidos}`;
-    document.getElementById('thread-info').innerHTML = UI.renderThreadInfo(record);
-    document.getElementById('approve-count').textContent = thread.votes.approve || 0;
-    document.getElementById('reject-count').textContent = thread.votes.reject || 0;
-    
-    // Renderizar balanza visual
-    this.renderModalVoteBalance(thread.votes);
-    
-    // Renderizar solo 5 comentarios más recientes en el modal
-    UI.renderComments(thread.comments, 5);
-    
-    // Verificar si el usuario ya votó
-    this.checkAndUpdateVoteButtons(recordId);
-    
-    UI.openModal('thread');
+    // Redirigir a details.html en lugar de abrir modal
+    this.viewDetails(recordId);
   },
 
   renderModalVoteBalance(votes) {

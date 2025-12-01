@@ -76,32 +76,43 @@ const Utils = {
     return { records: [], threads: {}, lastUpdate: 0 };
   },
 
-  saveLocalData(country, data) {
+  async saveLocalData(country, data) {
     const key = this.getStorageKey(country);
+    
+    // Intentar localStorage primero (más rápido)
     try {
       localStorage.setItem(key, JSON.stringify(data));
       return true;
     } catch (e) {
-      console.warn('⚠️ localStorage lleno, intentando IndexedDB...', e);
+      console.warn('⚠️ localStorage lleno, usando IndexedDB...', e.name);
 
-      // Si localStorage está lleno, intentar IndexedDB de forma async
+      // Si localStorage está lleno, usar IndexedDB
       if (typeof IndexedDBStorage !== 'undefined') {
-        IndexedDBStorage.saveData(country, data)
-          .then(() => {
-            console.log('✅ Datos guardados en IndexedDB');
-            if (typeof UI !== 'undefined') {
-              UI.showToast('Datos guardados en almacenamiento extendido', 'info');
-            }
-          })
-          .catch(err => {
-            console.error('Error guardando en IndexedDB:', err);
-          });
-        return true;
+        try {
+          await IndexedDBStorage.saveData(country, data);
+          console.log('✅ Datos guardados en IndexedDB');
+          
+          if (typeof UI !== 'undefined') {
+            UI.showToast('Usando almacenamiento extendido', 'info');
+          }
+          
+          return true;
+        } catch (err) {
+          console.error('Error guardando en IndexedDB:', err);
+          
+          if (typeof UI !== 'undefined') {
+            UI.showToast('Error: Almacenamiento lleno', 'error');
+          }
+          
+          return false;
+        }
       } else {
         console.error('IndexedDB no disponible');
+        
         if (typeof UI !== 'undefined') {
           UI.showToast('Error: Almacenamiento lleno', 'error');
         }
+        
         return false;
       }
     }
@@ -370,6 +381,19 @@ const Utils = {
     }
 
     return `https://instagram.com/${instagram}`;
+  },
+
+  // Proxy para imágenes de Instagram (evita tracking prevention)
+  proxyImageUrl(url) {
+    if (!url) return '';
+    
+    // Si es una URL de Instagram/Facebook CDN, usar proxy
+    if (url.includes('cdninstagram.com') || url.includes('fbcdn.net')) {
+      // Usar nuestro servidor como proxy
+      return `${API.baseURL}/api/proxy-image?url=${encodeURIComponent(url)}`;
+    }
+    
+    return url;
   }
 };
 

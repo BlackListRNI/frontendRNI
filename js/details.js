@@ -82,13 +82,14 @@ const DetailsPage = {
     
     let record = data.records.find(r => r.id === this.recordId);
     
-    // 2. Si no está local, intentar P2P
-    if (!record && typeof P2PMesh !== 'undefined') {
-      console.log('📡 Registro no encontrado, buscando en red P2P...');
+    // 2. Si no está local, intentar sincronizar chunks
+    if (!record && typeof ChunkManager !== 'undefined') {
+      console.log('📦 Registro no encontrado, sincronizando chunks...');
+      UI.showToast('🔄 Buscando registro...', 'info');
+      
       try {
-        await P2PMesh.init(this.country);
-        // Esperar un poco para que P2P sincronice
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await ChunkManager.init(this.country);
+        await ChunkManager.sync();
         
         // Recargar datos
         if (typeof IndexedDBStorage !== 'undefined') {
@@ -98,27 +99,7 @@ const DetailsPage = {
         }
         record = data.records.find(r => r.id === this.recordId);
       } catch (error) {
-        console.log('P2P no disponible aún, usando servidor...');
-      }
-    }
-    
-    // 3. Si aún no está, sincronizar con servidor
-    if (!record) {
-      console.log('📥 Registro no encontrado, sincronizando con servidor...');
-      try {
-        const result = await API.sync(this.country, data);
-        if (result && result.records) {
-          // Guardar datos sincronizados
-          if (typeof IndexedDBStorage !== 'undefined') {
-            await IndexedDBStorage.saveData(this.country, result);
-          } else {
-            Utils.saveLocalData(this.country, result);
-          }
-          data = result;
-          record = data.records.find(r => r.id === this.recordId);
-        }
-      } catch (error) {
-        console.error('Error sincronizando:', error);
+        console.error('Error sincronizando chunks:', error);
       }
     }
     
@@ -597,10 +578,30 @@ const DetailsPage = {
         this.userId
       );
 
-      const data = Utils.getLocalData(this.country);
+      // Cargar datos correctamente
+      let data = { records: [], threads: {} };
+      if (typeof IndexedDBStorage !== 'undefined') {
+        try {
+          data = await IndexedDBStorage.loadData(this.country);
+        } catch (error) {
+          data = Utils.getLocalData(this.country);
+        }
+      } else {
+        data = Utils.getLocalData(this.country);
+      }
+      
+      if (!data.threads) {
+        data.threads = {};
+      }
+      
       data.threads[this.recordId] = result.thread;
       data.lastUpdate = Date.now();
-      Utils.saveLocalData(this.country, data);
+      
+      // Guardar en ambos lugares
+      if (typeof IndexedDBStorage !== 'undefined') {
+        await IndexedDBStorage.saveData(this.country, data);
+      }
+      await Utils.saveLocalData(this.country, data);
       
       // Registrar que el usuario comentó (rate limiting)
       CommentRateLimit.recordComment(this.recordId, this.userId);
@@ -679,10 +680,33 @@ const DetailsPage = {
         this.userId
       );
 
-      const data = Utils.getLocalData(this.country);
+      // Cargar datos correctamente
+      let data = { records: [], threads: {} };
+      if (typeof IndexedDBStorage !== 'undefined') {
+        try {
+          data = await IndexedDBStorage.loadData(this.country);
+        } catch (error) {
+          data = Utils.getLocalData(this.country);
+        }
+      } else {
+        data = Utils.getLocalData(this.country);
+      }
+      
+      if (!data.threads) {
+        data.threads = {};
+      }
+      if (!data.threads[this.recordId]) {
+        data.threads[this.recordId] = { comments: [], votes: { approve: 0, reject: 0 } };
+      }
+      
       data.threads[this.recordId].votes = result.votes;
       data.lastUpdate = Date.now();
-      Utils.saveLocalData(this.country, data);
+      
+      // Guardar en ambos lugares
+      if (typeof IndexedDBStorage !== 'undefined') {
+        await IndexedDBStorage.saveData(this.country, data);
+      }
+      await Utils.saveLocalData(this.country, data);
       
       // Guardar que el usuario ya votó
       localStorage.setItem(voteKey, voteType);

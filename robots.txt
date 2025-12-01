@@ -1,0 +1,11 @@
+# robots.txt para RNI - Registro Nacional de Infieles
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://tudominio.com/sitemap.xml
+
+# Crawl-delay para ser amigable con los servidores
+Crawl-delay: 1

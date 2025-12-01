@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Meta Tags (se actualizarán dinámicamente con JavaScript) -->
+  <title>Detalles del Caso - RNI | Registro Nacional de Infieles</title>
+  <meta name="description" content="Consulta los detalles completos del caso, incluyendo pruebas, comentarios de la comunidad y votaciones. Participa en la verificación comunitaria.">
+  <meta name="keywords" content="caso infidelidad, detalles, pruebas, votación comunitaria, verificación">
+  <meta name="author" content="RNI">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="">
+  <meta property="og:title" content="Detalles del Caso - RNI">
+  <meta property="og:description" content="Consulta los detalles completos del caso, incluyendo pruebas, comentarios de la comunidad y votaciones.">
+  <meta property="og:image" content="https://tudominio.com/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="RNI">
+  <meta property="og:locale" content="es_ES">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="">
+  <meta name="twitter:title" content="Detalles del Caso - RNI">
+  <meta name="twitter:description" content="Consulta los detalles completos del caso, incluyendo pruebas, comentarios de la comunidad y votaciones.">
+  <meta name="twitter:image" content="https://tudominio.com/assets/og-image.jpg">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#f8b4d9">
+  <meta name="msapplication-TileColor" content="#f8b4d9">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="/css/details.css">
+  <link rel="stylesheet" href="/css/field-voting.css">
+</head>
+<body>
+  <div id="toast-container"></div>
+  
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo-section">
+          <img src="/assets/logo.svg" alt="RNI Logo" class="logo-icon">
+          <div>
+            <h1 class="logo">RNI</h1>
+            <p class="tagline">Registro Nacional de Infieles</p>
+          </div>
+        </div>
+        <button onclick="window.location.href='/'" class="btn-secondary">
+          <span class="icon">←</span> Volver
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="details-container">
+      <div class="details-header">
+        <div class="profile-section">
+          <div id="profile-photo-container">
+            <img id="profile-photo" src="" alt="Foto de perfil" class="profile-photo">
+          </div>
+          <div class="profile-info">
+            <h2 id="profile-name">Cargando...</h2>
+            <div id="profile-social" class="social-link"></div>
+            <div id="profile-status" class="status-badge"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-grid">
+        <div class="details-card">
+          <h3>📍 Ubicación</h3>
+          <div class="info-item">
+            <span class="info-label">Departamento:</span>
+            <span id="info-departamento" class="info-value">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Distrito:</span>
+            <span id="info-distrito" class="info-value">-</span>
+          </div>
+        </div>
+
+        <div class="details-card">
+          <h3>👤 Información Personal</h3>
+          <div class="info-item">
+            <span class="info-label">Edad:</span>
+            <span id="info-edad" class="info-value">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Ocupación:</span>
+            <span id="info-ocupacion" class="info-value">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">ETS:</span>
+            <span id="info-ets" class="info-value">-</span>
+          </div>
+        </div>
+
+        <div class="details-card">
+          <h3>💔 Detalles de la Infidelidad</h3>
+          <div class="info-item">
+            <span class="info-label">Tiempo de relación:</span>
+            <span id="info-tiempo" class="info-value">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Periodo de infidelidad:</span>
+            <span id="info-periodo" class="info-value">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="datos-adicionales-section" class="details-card full-width" style="display: none;">
+        <h3>📝 Datos Adicionales</h3>
+        <p id="datos-adicionales-text" class="additional-text"></p>
+      </div>
+
+      <div class="details-card full-width">
+        <h3>📸 Pruebas Iniciales</h3>
+        <div id="pruebas-gallery" class="gallery"></div>
+      </div>
+
+      <div class="details-card full-width">
+        <h3>⚖️ Votación del Caso</h3>
+        
+        <!-- Balanza visual -->
+        <div id="vote-balance" class="vote-balance"></div>
+        
+        <!-- Botones de votación -->
+        <div class="thread-votes">
+          <button id="btn-approve" class="vote-btn vote-approve">
+            <span class="vote-icon">✓</span>
+            <span class="vote-label">Aprobar</span>
+            <span id="approve-count" class="vote-count">0</span>
+          </button>
+          <button id="btn-reject" class="vote-btn vote-reject">
+            <span class="vote-icon">✗</span>
+            <span class="vote-label">Refutar</span>
+            <span id="reject-count" class="vote-count">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sección de propuestas de campos editables -->
+      <div id="field-proposals-container" class="details-card full-width"></div>
+
+      <div class="details-card full-width">
+        <h3>💬 Comentarios y Pruebas Adicionales</h3>
+        <div id="comments-list"></div>
+        <div id="comment-cooldown-notice" style="display: none; padding: 15px; margin-bottom: 15px; background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; border-radius: 4px;">
+          <p style="margin: 0; color: #856404;">
+            ⏱️ <strong>Debes esperar <span id="cooldown-time"></span> para comentar de nuevo</strong>
+          </p>
+        </div>
+        <form id="form-comment" class="comment-form">
+          <textarea name="comment" class="elegant-textarea" rows="3" placeholder="Agregar comentario o refutación..." required></textarea>
+          <input type="text" name="proofs" class="elegant-input" placeholder="Enlaces de pruebas adicionales (separados por coma)">
+          <button type="submit" class="btn-primary">Publicar</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <div id="modal-field-edit" class="modal" style="display: none;">
+    <div class="modal-header">
+      <h2 id="field-edit-title">Proponer cambio</h2>
+      <button class="modal-close" onclick="closeFieldEditor()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-current">
+        <strong>Valor actual:</strong>
+        <span id="field-current-value"></span>
+      </div>
+      
+      <form id="form-field-proposal" class="field-proposal-form">
+        <input type="hidden" id="field-record-id" name="recordId">
+        <input type="hidden" id="field-name-input" name="fieldName">
+        
+        <div class="form-group">
+          <label>Proponer nuevo valor:</label>
+          <input type="text" name="newValue" id="field-new-value" class="elegant-input" required>
+        </div>
+        
+        <button type="submit" class="btn-primary">Enviar Propuesta</button>
+      </form>
+
+      <div class="field-proposals-section">
+        <h3>Propuestas de la comunidad</h3>
+        <div id="field-proposals-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para ver imágenes en grande -->
+  <div id="image-modal" class="image-modal" onclick="closeImageModal()">
+    <span class="image-modal-close">&times;</span>
+    <img id="modal-image" class="image-modal-content" alt="Imagen ampliada">
+  </div>
+
+  <script src="/js/geoblock.js?v=5"></script>
+  <script src="/js/utils.js?v=5"></script>
+  <script src="/js/fingerprint.js?v=5"></script>
+  <script src="/js/api.js?v=5"></script>
+  <script src="/js/ui.js?v=5"></script>
+  <script src="/js/anonymousNames.js?v=5"></script>
+  <script src="/js/commentRateLimit.js?v=5"></script>
+  <script src="/js/fieldVoting.js?v=5"></script>
+  <script src="/js/details.js?v=5"></script>
+  
+  <script>
+    // Verificar acceso geográfico antes de inicializar
+    document.addEventListener('DOMContentLoaded', async () => {
+      const isAllowed = await GeoBlock.init();
+      if (!isAllowed) {
+        return;
+      }
+    });
+    
+    // Función para abrir modal de imagen
+    function openImageModal(imageUrl) {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-image');
+      modal.style.display = 'block';
+      modalImg.src = imageUrl;
+    }
+    
+    function closeImageModal() {
+      document.getElementById('image-modal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

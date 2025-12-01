@@ -1,0 +1,14 @@
+{
+  "name": "RNI - Registro Nacional de Infieles",
+  "short_name": "RNI",
+  "description": "Plataforma comunitaria para documentar y verificar casos de infidelidad",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f8b4d9",
+  "orientation": "portrait-primary",
+  "icons": [],
+  "categories": ["social", "lifestyle"],
+  "lang": "es",
+  "dir": "ltr"
+}

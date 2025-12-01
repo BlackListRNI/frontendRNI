@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Descubrir - RNI</title>
+  
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/discover.css">
+  <link rel="stylesheet" href="/css/ads.css?v=3">
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Cargando Descubrir</div>
+      <div class="loading-subtext">Preparando recomendaciones...</div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo-section">
+          <img src="/assets/logo.svg" alt="RNI Logo" class="logo-icon">
+          <div>
+            <h1 class="logo">RNI</h1>
+            <p class="tagline">Registro Nacional de Infieles</p>
+          </div>
+        </div>
+        
+        <div class="header-nav">
+          <button onclick="window.location.href='/'" class="btn-nav">
+            📋 Lista Negra
+          </button>
+          <button class="btn-nav active">
+            🔥 Descubrir
+          </button>
+        </div>
+        
+        <div class="country-selector">
+          <label class="country-label">País:</label>
+          <select id="country-select" class="elegant-select">
+            <option value="PE">🇵🇪 Perú</option>
+            <option value="MX">🇲🇽 México</option>
+            <option value="CO">🇨🇴 Colombia</option>
+            <option value="AR">🇦🇷 Argentina</option>
+            <option value="CL">🇨🇱 Chile</option>
+            <option value="ES">🇪🇸 España</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="ads-layout">
+    <!-- Sidebar izquierdo de publicidad -->
+    <aside class="ads-sidebar left" id="ads-left">
+      <!-- Los anuncios se cargan dinámicamente con JavaScript -->
+    </aside>
+
+    <!-- Contenido principal -->
+    <div class="main-content-with-ads">
+    <div class="discover-container">
+    <div class="discover-card-wrapper">
+      <div id="discover-card" class="discover-card">
+        <!-- Card se renderiza aquí -->
+      </div>
+      
+      <div class="discover-actions">
+        <button id="btn-dislike" class="action-btn dislike-btn" title="No me interesa">
+          <span class="action-icon">👎</span>
+        </button>
+        
+        <button id="btn-like" class="action-btn like-btn" title="Me interesa">
+          <span class="action-icon">👍</span>
+        </button>
+      </div>
+      
+      <div class="discover-hint">
+        <p>👆 Desliza o usa los botones para continuar</p>
+      </div>
+    </div>
+    </div>
+    </div>
+    
+    <!-- Sidebar derecho de publicidad -->
+    <aside class="ads-sidebar right" id="ads-right">
+      <!-- Los anuncios se cargan dinámicamente con JavaScript -->
+    </aside>
+  </main>
+
+  <!-- Modal para ver imágenes en grande -->
+  <div id="image-modal" class="image-modal" onclick="closeImageModal()">
+    <span class="image-modal-close">&times;</span>
+    <img id="modal-image" class="image-modal-content" alt="Imagen ampliada">
+  </div>
+
+  <script src="/js/geoblock.js?v=5"></script>
+  <script src="/js/utils.js?v=5"></script>
+  <script src="/js/fingerprint.js?v=5"></script>
+  <script src="/js/indexedDBStorage.js?v=5"></script>
+  <script src="/js/distributedStorage.js?v=5"></script>
+  <script src="/js/algorithm.js?v=5"></script>
+  <script src="/js/api.js?v=5"></script>
+  <script src="/js/ui.js?v=5"></script>
+  <script src="/js/deduplicator.js?v=5"></script>
+  <script src="/js/discover.js?v=5"></script>
+  
+  <!-- Sistema de publicidad -->
+  <script src="/js/ads-config.js?v=3"></script>
+  <script src="/js/ads.js?v=3"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const isAllowed = await GeoBlock.init();
+      if (!isAllowed) return;
+      
+      // Inicializar IndexedDB
+      try {
+        await IndexedDBStorage.init();
+        
+        // Migrar datos de localStorage a IndexedDB (solo una vez)
+        if (!localStorage.getItem('indexeddb_migrated')) {
+          await IndexedDBStorage.migrateFromLocalStorage();
+        }
+      } catch (error) {
+        console.error('Error inicializando IndexedDB:', error);
+      }
+      
+      // Inicializar sistema de almacenamiento distribuido
+      if (typeof DistributedStorage !== 'undefined') {
+        DistributedStorage.init();
+      }
+      
+      Discover.init();
+    });
+    
+    function closeImageModal() {
+      document.getElementById('image-modal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

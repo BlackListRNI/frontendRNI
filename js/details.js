@@ -64,31 +64,58 @@ const DetailsPage = {
   },
 
   async loadRecord() {
-    // Intentar cargar desde local primero
-    let data = Utils.getLocalData(this.country);
+    // 1. Intentar cargar desde IndexedDB primero
+    let data = { records: [], threads: {} };
+    
+    if (typeof IndexedDBStorage !== 'undefined') {
+      try {
+        await IndexedDBStorage.init();
+        data = await IndexedDBStorage.loadData(this.country);
+      } catch (error) {
+        console.error('Error cargando desde IndexedDB:', error);
+        // Fallback a localStorage
+        data = Utils.getLocalData(this.country);
+      }
+    } else {
+      data = Utils.getLocalData(this.country);
+    }
+    
     let record = data.records.find(r => r.id === this.recordId);
     
-    // Si no está local, sincronizar con servidor
-    if (!record) {
-      console.log('📥 Registro no encontrado localmente, sincronizando...');
+    // 2. Si no está local, intentar P2P
+    if (!record && typeof P2PMesh !== 'undefined') {
+      console.log('📡 Registro no encontrado, buscando en red P2P...');
       try {
-        const response = await fetch('/api/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            country: this.country,
-            clientData: data
-          })
-        });
+        await P2PMesh.init(this.country);
+        // Esperar un poco para que P2P sincronice
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        if (response.ok) {
-          const result = await response.json();
-          if (result.data && result.data.records) {
-            // Guardar datos sincronizados
-            Utils.saveLocalData(this.country, result.data);
-            data = result.data;
-            record = data.records.find(r => r.id === this.recordId);
+        // Recargar datos
+        if (typeof IndexedDBStorage !== 'undefined') {
+          data = await IndexedDBStorage.loadData(this.country);
+        } else {
+          data = Utils.getLocalData(this.country);
+        }
+        record = data.records.find(r => r.id === this.recordId);
+      } catch (error) {
+        console.error('Error en P2P:', error);
+      }
+    }
+    
+    // 3. Si aún no está, sincronizar con servidor
+    if (!record) {
+      console.log('📥 Registro no encontrado, sincronizando con servidor...');
+      try {
+        const result = await API.sync(this.country, data);
+        if (result && result.records) {
+          // Guardar datos sincronizados
+          if (typeof IndexedDBStorage !== 'undefined') {
+            await IndexedDBStorage.saveData(this.country, result);
+          } else {
+            Utils.saveLocalData(this.country, result);
           }
+          data = result;
+          record = data.records.find(r => r.id === this.recordId);
         }
       } catch (error) {
         console.error('Error sincronizando:', error);

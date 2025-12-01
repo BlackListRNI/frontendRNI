@@ -54,6 +54,13 @@ const App = {
     this.syncWithServer().catch(error => {
       console.log('Sync en background falló:', error);
     });
+    
+    // Inicializar P2P Mesh en background
+    if (typeof P2PMesh !== 'undefined') {
+      P2PMesh.init(this.currentCountry).catch(error => {
+        console.log('P2P Mesh no disponible:', error);
+      });
+    }
   },
 
   hideLoadingScreen() {
@@ -416,6 +423,11 @@ const App = {
       UI.closeModal();
       UI.showToast('✅ Infiel publicado exitosamente', 'success');
       this.syncWithServer();
+      
+      // Broadcast a red P2P
+      if (typeof P2PMesh !== 'undefined' && P2PMesh.isInitialized) {
+        P2PMesh.broadcastNewRecord(record);
+      }
       
       // Restaurar botón (aunque el modal se cierra, por si acaso)
       submitBtn.disabled = false;

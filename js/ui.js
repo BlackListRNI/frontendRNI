@@ -179,9 +179,9 @@ const UI = {
       // Renderizar datos extra con tooltip
       const extraHtml = extraData.total > 0
         ? `<span class="extra-data-badge" title="${extraData.tooltip}">
-             ${extraData.icon} ${extraData.total} ${extraData.total === 1 ? 'item' : 'items'}
+             Sí
            </span>`
-        : '-';
+        : 'NO';
       
       return `
         <tr ${isDuplicate ? 'class="duplicate-row" title="⚠️ Posible duplicado detectado"' : ''}>

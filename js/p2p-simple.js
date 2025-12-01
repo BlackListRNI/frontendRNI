@@ -15,7 +15,7 @@ const P2PSimple = {
         this.country = country;
         this.myPeerId = `peer_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-        console.log(`📢 Iniciando P2P para ${country}`);
+        console.log(`📢 Iniciando sincronización para ${country}`);
 
         // Inicializar IndexedDB
         await IndexedDBStorage.init();
@@ -23,16 +23,15 @@ const P2PSimple = {
         // Cargar mis datos locales
         await this.loadMyData();
 
-        // Anunciar presencia inmediatamente
-        await this.announce();
+        // Sincronizar con servidor inmediatamente
+        await this.syncWithServer();
 
-        // Si no tengo datos, intentar obtenerlos de otros peers
-        if (!this.myData || this.myData.records.length === 0) {
-            await this.requestDataFromPeers();
-        }
+        // Anunciar presencia
+        await this.announce();
 
         // Sincronizar cada 2 minutos
         this.syncInterval = setInterval(() => {
+            this.syncWithServer();
             this.announce();
         }, 2 * 60 * 1000);
 
@@ -140,10 +139,49 @@ const P2PSimple = {
         }
     },
 
+    async syncWithServer() {
+        try {
+            console.log('🔄 Sincronizando con servidor...');
+
+            const response = await fetch(`${API.baseURL}/api/sync`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    country: this.country,
+                    clientData: this.myData
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                if (result.data && result.data.records) {
+                    // Actualizar datos locales con datos del servidor
+                    this.myData = result.data;
+
+                    // Guardar en IndexedDB
+                    await IndexedDBStorage.saveData(this.country, this.myData);
+
+                    // Guardar en localStorage (backup)
+                    await Utils.saveLocalData(this.country, this.myData);
+
+                    // Actualizar UI
+                    if (typeof Filters !== 'undefined') {
+                        Filters.setRecords(this.myData.records);
+                    }
+
+                    console.log(`✅ ${this.myData.records.length} registros sincronizados`);
+                }
+            }
+        } catch (error) {
+            console.error('Error sincronizando:', error);
+        }
+    },
+
     async forceSync() {
         await this.loadMyData();
+        await this.syncWithServer();
         await this.announce();
-        await this.requestDataFromPeers();
     },
 
     disconnect() {

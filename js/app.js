@@ -201,12 +201,10 @@ const App = {
           btnSync.innerHTML = '✅ Sincronizado';
           btnSync.style.opacity = '1';
 
-          // Restaurar después de 2 segundos
+          // Esperar 1 segundo y hacer hard refresh (Ctrl+Shift+R)
           setTimeout(() => {
-            btnSync.innerHTML = originalHTML;
-            btnSync.disabled = false;
-            btnSync.style.cursor = 'pointer';
-          }, 2000);
+            location.reload(true);
+          }, 1000);
         } catch (error) {
           // Feedback de error
           btnSync.innerHTML = '❌ Error';

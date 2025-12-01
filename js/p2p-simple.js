@@ -41,18 +41,30 @@ const P2PSimple = {
 
     async loadMyData() {
         try {
+            let data = { records: [], threads: {} };
+
             // Intentar IndexedDB primero
-            this.myData = await IndexedDBStorage.loadData(this.country);
-            
-            if (!this.myData || !this.myData.records || this.myData.records.length === 0) {
-                // Fallback a localStorage
-                this.myData = Utils.getLocalData(this.country);
+            try {
+                data = await IndexedDBStorage.loadData(this.country);
+            } catch (e) {
+                console.log('IndexedDB no disponible, usando localStorage');
             }
-            
-            if (!this.myData.records) {
-                this.myData = { records: [], threads: {} };
+
+            // Si no hay datos en IndexedDB, intentar localStorage
+            if (!data || !data.records || data.records.length === 0) {
+                data = Utils.getLocalData(this.country);
             }
-            
+
+            // Asegurar estructura
+            if (!data.records) {
+                data.records = [];
+            }
+            if (!data.threads) {
+                data.threads = {};
+            }
+
+            this.myData = data;
+
             console.log(`💾 Datos locales: ${this.myData.records.length} registros`);
         } catch (error) {
             console.error('Error cargando datos:', error);
@@ -77,7 +89,7 @@ const P2PSimple = {
             if (response.ok) {
                 const result = await response.json();
                 console.log(`📢 ${this.country}: ${result.totalPeers} peers, ${result.totalRecords} registros en red`);
-                
+
                 // Si hay otros peers con más datos, sincronizar
                 if (result.totalRecords > recordCount) {
                     await this.requestDataFromPeers();
@@ -91,7 +103,7 @@ const P2PSimple = {
     async requestDataFromPeers() {
         try {
             console.log('🔄 Solicitando datos de otros peers...');
-            
+
             const response = await fetch(`${API.baseURL}/api/data/request`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -102,7 +114,7 @@ const P2PSimple = {
 
             if (response.ok) {
                 const result = await response.json();
-                
+
                 if (result.peers && result.peers.length > 0) {
                     console.log(`✅ Encontrados ${result.peers.length} peers con datos`);
                     // En un sistema P2P real, aquí se conectaría directamente con esos peers

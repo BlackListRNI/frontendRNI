@@ -870,127 +870,20 @@ const App = {
   },
 
   async syncWithServer() {
-    // Cargar datos de forma segura
-    const localData = await this.loadDataSafe(this.currentCountry);
-    console.log(`📊 Datos locales: ${localData.records.length} registros`);
-
+    // P2PSimple maneja la sincronización automáticamente
+    console.log('💾 Sincronización delegada a P2PSimple');
+    
     try {
-      console.log(`🔄 Sincronizando con servidor (enviando ${localData.records.length} registros)...`);
-      
-      // 1. SINCRONIZAR CON SERVIDOR
-      const result = await API.sync(
-        this.currentCountry,
-        localData,
-        localData.lastUpdate
-      );
-
-      console.log(`📥 Servidor respondió con ${result.data?.records?.length || 0} registros`);
-
-      // 2. MERGE INTELIGENTE (nunca perder datos)
-      let mergedData = this.mergeData(localData, result.data);
-      mergedData = Deduplicator.cleanCountryData(mergedData);
-      mergedData.lastUpdate = Date.now();
-      
-      const totalRecords = mergedData.records.length;
-      console.log(`✅ Total después de merge: ${totalRecords} registros`);
-      
-      // 3. SISTEMA HÍBRIDO CON CHUNKS REPLICADOS
-      if (typeof IndexedDBStorage !== 'undefined' && typeof DistributedStorage !== 'undefined') {
-        try {
-          // Detectar capacidad del dispositivo
-          const deviceMemory = navigator.deviceMemory || 4;
-          const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-          
-          // Umbrales adaptativos
-          let THRESHOLD;
-          if (isMobile) {
-            THRESHOLD = 1500;
-          } else if (deviceMemory >= 8) {
-            THRESHOLD = 3000;
-          } else if (deviceMemory >= 4) {
-            THRESHOLD = 2000;
-          } else {
-            THRESHOLD = 1000;
-          }
-          
-          if (totalRecords < THRESHOLD) {
-            // MODO COMPLETO: Guardar TODO (pocos datos)
-            console.log(`💾 MODO COMPLETO: Guardando ${totalRecords} registros`);
-            await IndexedDBStorage.saveData(this.currentCountry, mergedData);
-            
-          } else {
-            // MODO CHUNKS REPLICADOS: Proteger contra pérdida
-            console.log(`📦 MODO CHUNKS: ${totalRecords} registros (umbral: ${THRESHOLD})`);
-            
-            // Crear chunks
-            const allChunks = DistributedStorage.createChunks(mergedData.records);
-            console.log(`📦 ${allChunks.length} chunks creados (50 registros/chunk)`);
-            
-            // Asignar chunks CON REPLICACIÓN (factor 3)
-            const myChunks = DistributedStorage.assignChunksToClient(allChunks, this.userId);
-            console.log(`💾 Esta PC guardará ${myChunks.length} chunks (con replicación)`);
-            
-            // Guardar chunks en IndexedDB
-            for (const chunk of myChunks) {
-              await IndexedDBStorage.saveChunk({
-                ...chunk,
-                country: this.currentCountry
-              });
-            }
-            
-            // Guardar metadata
-            const merkleRoot = DistributedStorage.buildMerkleTree(allChunks);
-            await IndexedDBStorage.saveMetadata('merkle_root_' + this.currentCountry, merkleRoot);
-            await IndexedDBStorage.saveMetadata('storage_mode_' + this.currentCountry, 'distributed');
-            await IndexedDBStorage.saveMetadata('total_chunks_' + this.currentCountry, allChunks.length);
-            await IndexedDBStorage.saveMetadata('total_records_' + this.currentCountry, totalRecords);
-            await IndexedDBStorage.saveMetadata('my_chunks_' + this.currentCountry, myChunks.map(c => c.id));
-            
-            // Guardar índice ligero (solo IDs y nombres)
-            const recordIndex = mergedData.records.map(r => ({
-              id: r.id,
-              nombres: r.nombres,
-              apellidos: r.apellidos,
-              edad: r.edad,
-              departamento: r.departamento,
-              createdAt: r.createdAt
-            }));
-            await IndexedDBStorage.saveMetadata('record_index_' + this.currentCountry, recordIndex);
-            
-            console.log(`✅ Sistema chunks activado: ${myChunks.length}/${allChunks.length} chunks guardados`);
-            console.log(`📊 Ahorro de espacio: ${Math.round((1 - myChunks.length/allChunks.length) * 100)}%`);
-          }
-          
-        } catch (error) {
-          console.error('Error en sistema de chunks:', error);
-          // Fallback: guardar todo
-          await IndexedDBStorage.saveData(this.currentCountry, mergedData);
-        }
+      // Forzar sincronización si P2PSimple está disponible
+      if (typeof P2PSimple !== 'undefined' && P2PSimple.isInitialized) {
+        await P2PSimple.forceSync();
+        UI.showToast('✅ Sincronización completada', 'success');
       } else {
-        // Sin IndexedDB, usar localStorage
-        Utils.saveLocalData(this.currentCountry, mergedData);
+        UI.showToast('⚠️ P2P no inicializado', 'warning');
       }
-      
-      // Recargar datos
-      await this.loadLocalData();
-      
-      // FORZAR actualización de UI (especialmente para Brave)
-      // Brave tiene problemas con IndexedDB y actualización de DOM
-      if (typeof Filters !== 'undefined' && typeof Pagination !== 'undefined') {
-        // Esperar a que IndexedDB termine de escribir
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Forzar re-renderizado completo
-        Filters.setRecords(mergedData.records);
-        
-        console.log(`🔄 UI actualizada con ${mergedData.records.length} registros`);
-      }
-      
-      UI.showToast(`✅ ${mergedData.records.length} registros sincronizados`, 'success');
     } catch (error) {
       console.error('Error en sincronización:', error);
       UI.showToast('Error de conexión. Trabajando en modo offline', 'error');
-      throw error; // Re-lanzar para que el botón muestre error
     }
   },
 
